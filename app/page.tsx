@@ -26,6 +26,27 @@ function localDate(offset = 0) {
 }
 const formatFare = (fare: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(fare);
 
+type LiveTrip = {
+  id: string;
+  busLabel: string;
+  busType: string;
+  departureAt: string;
+  arrivalAt: string;
+  farePaise: number;
+  currency: string;
+  route: {
+    origin_city: string;
+    destination_city: string;
+    origin_stop: string | null;
+    destination_stop: string | null;
+  } | {
+    origin_city: string;
+    destination_city: string;
+    origin_stop: string | null;
+    destination_stop: string | null;
+  }[];
+};
+
 type BookingStatusResult = {
   reference: string;
   status: string;
@@ -60,6 +81,9 @@ export default function Home() {
   const [passengers, setPassengers] = useState("1");
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState("");
+  const [liveTrips, setLiveTrips] = useState<LiveTrip[]>([]);
+  const [liveSearchLoading, setLiveSearchLoading] = useState(false);
+  const [liveSearchMessage, setLiveSearchMessage] = useState("");
   const [mobileMenu, setMobileMenu] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<(typeof routes)[number] | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -78,7 +102,7 @@ export default function Home() {
     [from, to]
   );
 
-  function searchBuses() {
+  async function searchBuses() {
     if (from === to) {
       setError("Choose two different cities to find your journey.");
       setSearched(false);
@@ -90,11 +114,32 @@ export default function Home() {
       return;
     }
     setError("");
+    setLiveSearchMessage("");
+    setLiveTrips([]);
+    setLiveSearchLoading(true);
     setSelectedRoute(null);
     setSelectedSeats([]);
     setBookingConfirmed(false);
     setSearched(true);
     document.getElementById("search-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    try {
+      const params = new URLSearchParams({ origin: from, destination: to, date });
+      const response = await fetch(`/api/trips/search?${params.toString()}`, { cache: "no-store" });
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) {
+        setLiveSearchMessage("Live schedules are temporarily unavailable. The sample route previews below are not bookable.");
+        return;
+      }
+      const trips = Array.isArray(payload.trips) ? payload.trips as LiveTrip[] : [];
+      setLiveTrips(trips);
+      setLiveSearchMessage(trips.length
+        ? "Live inventory results from the database. Booking and seat holds are not enabled yet."
+        : "No live trips are listed for this route and date yet. Sample previews below are for design only and cannot be booked.");
+    } catch {
+      setLiveSearchMessage("Could not reach live trip search. Sample route previews below are not bookable.");
+    } finally {
+      setLiveSearchLoading(false);
+    }
   }
 
   function selectRoute(route: (typeof routes)[number]) {
@@ -152,7 +197,7 @@ export default function Home() {
         <div className="booking-foot"><span><Check size={14} /> No hidden charges</span><span><Check size={14} /> Simple booking experience</span><span><Check size={14} /> Travel on your terms</span></div>
       </section>
 
-      {searched && <section className="results-section" id="search-results"><div className="results-heading"><div><span className="section-overline">YOUR SEARCH</span><h2>{from} <ArrowRight size={21} /> {to}</h2><p>{date} · {passengers} passenger{passengers === "1" ? "" : "s"}</p></div><span className="demo-pill">Preview results</span></div>{matchingRoutes.length ? <div className="results-grid">{matchingRoutes.map((route) => <article className="result-card" key={route.from + route.to}><div className="result-top"><span>{route.tag}</span><small>Sample fare</small></div><div className="result-times"><div><b>{route.depart}</b><small>{route.from}</small></div><div className="duration"><span /><small><Clock3 size={13} /> {route.time}</small></div><div className="align-right"><b>{route.arrive}</b><small>{route.to}</small></div></div><div className="result-bottom"><span>Starting from <strong>{formatFare(route.fare)}</strong></span><span className="sample-note">Demo only</span></div><button className="choose-seats-button" onClick={() => { setSelectedRoute(route); setSelectedSeats([]); setBookingConfirmed(false); setBookingError(""); setPassengerName(""); setPassengerPhone(""); setTimeout(() => document.getElementById("seat-selection")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0); }}><Armchair size={16} /> Choose seats <ArrowRight size={15} /></button></article>)}</div> : <div className="empty-results"><BusFront size={27} /><div><b>We don't have a sample route for this search yet.</b><p>Try one of the popular routes below. Live schedules are not connected yet.</p></div></div>}</section>}
+      {searched && <section className="results-section" id="search-results"><div className="results-heading"><div><span className="section-overline">YOUR SEARCH</span><h2>{from} <ArrowRight size={21} /> {to}</h2><p>{date} · {passengers} passenger{passengers === "1" ? "" : "s"}</p></div><span className="demo-pill">{liveTrips.length ? "Live database" : "Preview results"}</span></div>{liveSearchLoading && <div className="empty-results"><BusFront size={27} /><div><b>Checking available trips…</b><p>Searching the trip inventory for your selected route and date.</p></div></div>}{!liveSearchLoading && liveTrips.length > 0 && <div className="results-grid">{liveTrips.map((trip) => { const route = Array.isArray(trip.route) ? trip.route[0] : trip.route; return <article className="result-card" key={trip.id}><div className="result-top"><span>{trip.busType || "Bus service"}</span><small>Live listing</small></div><div className="result-times"><div><b>{new Date(trip.departureAt).toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"})}</b><small>{route?.origin_stop || route?.origin_city || from}</small></div><div className="duration"><span /><small><Clock3 size={13} /> {Math.max(0, Math.round((new Date(trip.arrivalAt).getTime() - new Date(trip.departureAt).getTime()) / 60000 / 60))}h approx.</small></div><div className="align-right"><b>{new Date(trip.arrivalAt).toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"})}</b><small>{route?.destination_stop || route?.destination_city || to}</small></div></div><div className="result-bottom"><span>Fare <strong>{formatFare(Math.round(trip.farePaise / 100))}</strong></span><span className="sample-note">Not bookable yet</span></div><button className="choose-seats-button" disabled><Armchair size={16} /> Booking coming soon <ArrowRight size={15} /></button></article>; })}</div>}{!liveSearchLoading && liveTrips.length === 0 && <div className="empty-results"><BusFront size={27} /><div><b>{liveSearchMessage || "No live trips found for this route and date."}</b><p>Sample schedules below are illustrative only; they do not reserve seats or issue tickets.</p></div></div>}{!liveSearchLoading && matchingRoutes.length > 0 && <><div className="results-heading" style={{marginTop: "24px"}}><div><span className="section-overline">DESIGN PREVIEW</span><p>Illustrative sample schedules — not connected to live inventory</p></div><span className="demo-pill">Demo only</span></div><div className="results-grid">{matchingRoutes.map((route) => <article className="result-card" key={"sample-" + route.from + route.to}><div className="result-top"><span>{route.tag}</span><small>Sample fare</small></div><div className="result-times"><div><b>{route.depart}</b><small>{route.from}</small></div><div className="duration"><span /><small><Clock3 size={13} /> {route.time}</small></div><div className="align-right"><b>{route.arrive}</b><small>{route.to}</small></div></div><div className="result-bottom"><span>Starting from <strong>{formatFare(route.fare)}</strong></span><span className="sample-note">Demo only</span></div><button className="choose-seats-button" onClick={() => { setSelectedRoute(route); setSelectedSeats([]); setBookingConfirmed(false); setBookingError(""); setPassengerName(""); setPassengerPhone(""); setTimeout(() => document.getElementById("seat-selection")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0); }}><Armchair size={16} /> Choose seats <ArrowRight size={15} /></button></article>)}</div></>}{!liveSearchLoading && matchingRoutes.length === 0 && liveTrips.length === 0 && <div className="empty-results"><BusFront size={27} /><div><b>No matching sample route.</b><p>Live search is checked separately above; sample previews are available only for selected popular routes.</p></div></div>}</section>}
 
 
       {selectedRoute && <section className="seat-section" id="seat-selection"><div className="seat-section-head"><div><span className="section-overline">STEP 2 OF 3 · SEAT SELECTION</span><h2>Make yourself comfortable.</h2><p>{selectedRoute.from} to {selectedRoute.to} · {date} · Sample schedule {selectedRoute.depart}</p></div><button className="text-button" onClick={() => { setSelectedRoute(null); setSelectedSeats([]); }}>Change route <X size={15} /></button></div>
