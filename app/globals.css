@@ -58,3 +58,139 @@ button,input,select{font:inherit}button,a{cursor:pointer;transition:all .2s ease
 .passenger-card .form-field input[type=email]{width:100%;min-width:0}
 .passenger-card .search-button:disabled{opacity:.6;cursor:wait}
 @media(max-width:760px){.live-seat-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.live-seat-list button{min-height:54px}}
+
+
+/* HepraBus visual refresh — refined typography, softer surfaces and responsive polish */
+:root{
+  --orange:#f36b35;--orange-dark:#df5424;--navy:#101f35;--navy-2:#193653;
+  --ink:#17263b;--muted:#738196;--line:#e5eaf0;--paper:#f6f8fb;--cream:#fff4ed;
+  --radius:20px
+}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fff;color:var(--ink)}
+button,input,select{font-family:inherit}
+.announcement{height:32px;background:#0b192c;font-size:10px;letter-spacing:.45px}
+.site-header{position:sticky;top:0;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,.85)}
+.nav-wrap{height:74px}
+.brand-mark{border-radius:13px;background:linear-gradient(145deg,#ff8754,#e95422);box-shadow:0 8px 20px #f36b3533}
+.brand-copy strong{font-size:26px;letter-spacing:-1.4px}
+.main-nav{gap:27px}
+.main-nav a{font-size:12px;transition:color .18s ease}
+.my-trips{border-radius:999px;padding:11px 16px;background:#fff}
+.hero{background:radial-gradient(ellipse at 76% 28%,#345775 0%,transparent 35%),linear-gradient(115deg,#0b192c 0%,#132c46 58%,#20435b 100%)}
+.hero-inner{min-height:445px;padding-top:70px;padding-bottom:64px}
+.hero h1{font-size:clamp(46px,5.4vw,70px);line-height:1.02;letter-spacing:-3.8px}
+.hero h1 em{color:#ff9565}
+.hero-copy>p{font-size:14px;line-height:1.9;color:#d0dae5}
+.hero-points span{font-size:11px;color:#f3f6fa}
+.hero-visual{transform:scale(.98);transform-origin:center}
+.sun-disc{box-shadow:0 0 90px #ff9c6240}
+.illustration-bus{background:linear-gradient(145deg,#ff945e,#ee5928);box-shadow:0 30px 55px #020b174d}
+.booking-shell{border:1px solid #e7ebf1;border-radius:22px;padding:25px 26px 17px;box-shadow:0 24px 70px #0e203513,0 3px 12px #0e203508}
+.booking-heading h2{font-size:23px;letter-spacing:-.9px}
+.field{border-color:#e2e8ef;border-radius:13px;background:#fff;transition:border-color .2s,box-shadow .2s}
+.field:focus-within{border-color:#f4a07c;box-shadow:0 0 0 3px #f36b3514}
+.field>span{letter-spacing:1px}
+.field-control select,.field-control input{font-size:13px}
+.swap-button{box-shadow:0 3px 10px #f36b3510}
+.search-button{border-radius:12px;background:linear-gradient(135deg,#ff804c,#e95725);box-shadow:0 9px 22px #f36b352b;min-height:50px}
+.search-button:hover{box-shadow:0 13px 27px #f36b3538;transform:translateY(-2px)}
+.results-section{margin-top:38px}
+.results-heading h2{font-size:26px;letter-spacing:-.8px}
+.result-card{border-radius:17px;padding:19px;box-shadow:0 5px 18px #13253c05;transition:transform .2s,border-color .2s,box-shadow .2s}
+.result-card:hover{transform:translateY(-2px);border-color:#ffd2bf;box-shadow:0 12px 28px #13253c0b}
+.result-times b{letter-spacing:-.45px}
+.result-bottom{padding-top:15px}
+.trust-strip{margin-top:42px;padding-top:29px;padding-bottom:29px}
+.trust-item>span{border-radius:14px;background:linear-gradient(145deg,#fff3eb,#fff9f5);border:1px solid #ffe6d8}
+.routes-section{margin-top:76px;margin-bottom:68px}
+.section-heading h2{font-size:clamp(28px,3.2vw,37px);letter-spacing:-1.6px}
+.route-grid{gap:18px}
+.route-card{border-radius:19px;box-shadow:0 5px 18px #13253c06;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.route-card:hover{transform:translateY(-5px);box-shadow:0 18px 36px #13253c13;border-color:#ffd1bc}
+.route-art{height:142px}
+.route-card-content{padding:17px 18px 19px}
+.seat-section,.my-trips-section{scroll-margin-top:96px}
+.seat-map-card,.passenger-card,.trip-lookup-form{border-radius:18px;box-shadow:0 10px 32px #12243a0a}
+.live-seat-list button{border-radius:12px;transition:all .18s ease}
+.live-seat-list button.available:hover{border-color:#61bd8a;background:#e6f8ee;transform:translateY(-1px)}
+.live-seat-list button.selected{box-shadow:0 5px 14px #f36b3535}
+.form-field>div,.trip-lookup-form input{border-radius:11px}
+.form-field>div:focus-within,.trip-lookup-form input:focus{border-color:#f4a07c;box-shadow:0 0 0 3px #f36b3514}
+.confirmation-card,.trip-lookup-result{border-radius:20px}
+.demo-pill{border:1px solid #ffe0ce}
+:focus-visible{outline:3px solid #f6a17e;outline-offset:3px}
+::selection{background:#ffe0cf;color:#15263c}
+@media(min-width:761px){
+  .booking-shell{margin-top:-30px}
+  .booking-foot{gap:25px}
+}
+@media(max-width:1100px){
+  .nav-wrap{padding-left:22px;padding-right:22px;gap:18px}
+  .main-nav{gap:17px}
+  .booking-shell{margin-left:18px;margin-right:18px}
+  .booking-fields{grid-template-columns:minmax(120px,1fr) 34px minmax(120px,1fr) minmax(145px,1fr) minmax(120px,.9fr) 155px}
+  .search-button{font-size:11px;padding-left:10px;padding-right:10px}
+}
+@media(max-width:760px){
+  .announcement{height:auto;min-height:31px;padding:7px 12px;text-align:center;font-size:9px;line-height:1.45}
+  .nav-wrap{height:66px;padding:0 16px}
+  .brand-mark{width:39px;height:39px;border-radius:12px}
+  .brand-copy strong{font-size:23px}
+  .my-trips{padding:10px 12px;font-size:11px}
+  .hero-inner{padding:45px 20px 35px;min-height:0;grid-template-columns:1fr;gap:10px}
+  .hero h1{font-size:clamp(43px,11vw,59px);letter-spacing:-2.8px;margin-top:18px}
+  .hero-copy>p{font-size:13px;line-height:1.75;max-width:360px}
+  .hero-points{gap:13px;margin-top:20px}
+  .hero-points span{font-size:10px}
+  .hero-visual{height:215px;margin-top:2px;transform:scale(.82);transform-origin:center top;margin-bottom:-27px}
+  .sun-disc{width:165px;height:165px;right:18%;top:0}
+  .illustration-bus{width:280px;height:123px;right:5%;top:51px}
+  .illustration-bus:before{font-size:12px;bottom:16px}
+  .bus-windows{height:46px;top:12px}
+  .bus-front{top:12px;height:48px}
+  .visual-label{left:0;bottom:0;padding:9px 11px}
+  .hero-bottom{height:31px;font-size:7px;letter-spacing:1.1px;gap:10px}
+  .hero-bottom-line{width:20px}
+  .booking-shell{margin:-18px 12px 0;padding:19px 14px 14px;border-radius:18px}
+  .booking-heading{align-items:start;gap:8px}
+  .booking-heading h2{font-size:21px}
+  .one-way{font-size:8px;padding:7px 9px}
+  .booking-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px}
+  .field{min-height:66px;padding:10px;border-radius:12px}
+  .field.from-field,.field.to-field{grid-column:auto}
+  .swap-button{grid-column:1/-1;grid-row:2;width:32px;height:32px;justify-self:center;margin:-2px 0}
+  .field.to-field{grid-column:2;grid-row:2}
+  .field.date-field{grid-column:1;grid-row:3}
+  .field.passenger-field{grid-column:2;grid-row:3}
+  .search-button{grid-column:1/-1;width:100%;min-height:49px}
+  .field-control select,.field-control input{font-size:12px}
+  .booking-foot{gap:9px 15px;margin-top:13px}
+  .booking-foot span{font-size:9px}
+  .results-section{padding:0 15px;margin-top:28px}
+  .results-heading{align-items:start;gap:10px}
+  .results-heading h2{font-size:22px}
+  .results-heading p{font-size:11px;line-height:1.6}
+  .results-grid{grid-template-columns:1fr;gap:11px}
+  .result-card{padding:15px;border-radius:15px}
+  .result-times{margin:16px 0}
+  .result-times b{font-size:16px}
+  .trust-strip{margin:27px 15px 0;padding:22px 0;grid-template-columns:1fr 1fr;gap:18px 12px}
+  .trust-item{gap:9px}
+  .trust-item>span{width:38px;height:38px;border-radius:12px}
+  .trust-item b{font-size:10px}
+  .trust-item small{font-size:9px;line-height:1.4}
+  .routes-section{margin:48px auto 42px;padding:0 15px}
+  .section-heading{align-items:start;gap:12px}
+  .section-heading h2{font-size:29px}
+  .section-heading p{font-size:11px;line-height:1.6}
+  .section-heading>a{font-size:10px;white-space:nowrap}
+  .route-grid{grid-template-columns:1fr;gap:13px}
+  .route-art{height:130px}
+  .route-card-content{padding:15px}
+  .my-trips-section{padding:40px 15px}
+  .my-trips-heading h2{font-size:29px}
+  .my-trips-heading p{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
