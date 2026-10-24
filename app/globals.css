@@ -300,3 +300,59 @@ button,input,select{font-family:inherit}
  .live-result-bottom strong{font-size:20px}
  .live-result-bottom .choose-seats-button{min-width:0;padding:0 10px;font-size:10px;min-height:43px}
 }
+
+/* Live seat selection: stronger hierarchy, clearer totals, mobile-first form */
+.seat-section{max-width:1164px;margin:42px auto 0;padding:0 28px;scroll-margin-top:94px}
+.seat-section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:19px}
+.seat-section-head h2{font-size:clamp(26px,3.4vw,35px);letter-spacing:-1.3px;color:var(--navy);margin:8px 0}
+.seat-section-head p{font-size:12px;line-height:1.7;color:var(--muted);margin:0}
+.seat-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:17px;align-items:start}
+.seat-map-card,.passenger-card{border:1px solid var(--line);border-radius:19px;padding:22px;background:#fff;box-shadow:0 10px 30px #12243a08;min-width:0}
+.seat-map-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:17px;border-bottom:1px solid #edf0f4}
+.seat-map-top>div{display:grid;gap:5px}
+.seat-map-top .section-overline{font-size:8px;margin-bottom:2px}
+.seat-map-top b{font-size:19px;color:var(--navy);letter-spacing:-.5px}
+.seat-map-top small{font-size:10px;color:var(--muted)}
+.seat-legend{display:flex;gap:13px;flex-wrap:wrap;margin:16px 0}
+.seat-legend span{display:flex;align-items:center;gap:6px;font-size:10px;color:#6f7d8e}
+.seat-legend i{width:11px;height:11px;border-radius:4px;display:inline-block}
+.legend-available{background:#e7f7ee;border:1px solid #a9d9bd}
+.legend-selected{background:var(--orange);border:1px solid var(--orange)}
+.legend-occupied{background:#e9edf2;border:1px solid #d8dfe7}
+.live-seat-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0;padding:16px;border:1px solid #e9edf2;border-radius:15px;background:linear-gradient(180deg,#f9fbfd,#fff)}
+.live-seat-list button{min-height:66px;border-radius:12px;box-shadow:0 2px 4px #14273c05}
+.live-seat-list button.available{background:#f0faf4;border-color:#b8e1c8;color:#17663e}
+.live-seat-list button.selected{background:linear-gradient(145deg,#ff8754,#e95826);border-color:#e95826;color:white;box-shadow:0 6px 15px #f36b3530}
+.live-seat-list button.occupied{background:#f0f2f5;color:#939dab;border-color:#e1e5eb}
+.seat-map-note{font-size:10px;line-height:1.7;color:#8793a2;margin:13px 0 0}
+.passenger-card{position:relative}
+.passenger-card h3{font-size:24px;letter-spacing:-.8px;margin:8px 0}
+.passenger-intro{font-size:11px;line-height:1.7;color:var(--muted);margin:0 0 16px}
+.passenger-card .form-field{margin-top:12px}
+.passenger-card .form-field>div{height:48px;border-radius:11px;background:#fff}
+.live-fare-breakdown{margin-top:19px;padding:16px;border:1px solid #e4eaf1;border-radius:14px;background:#f8fafc}
+.live-fare-title{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:10px;border-bottom:1px solid #e3e9f0;font-size:9px;letter-spacing:.8px;font-weight:900;color:#66768a}
+.live-fare-title span:last-child{letter-spacing:0;font-weight:700;color:#8692a1}
+.live-fare-breakdown>div:not(.live-fare-title){display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-size:11px;color:#728094}
+.live-fare-breakdown b{font-size:11px;color:#293c52;text-align:right}
+.live-fare-breakdown .live-fare-total{padding-top:13px;margin-top:14px;border-top:1px solid #e1e7ee;color:var(--navy);font-weight:800}
+.live-fare-total strong{font-size:23px;letter-spacing:-.6px;color:var(--navy)}
+.live-fare-breakdown>p{font-size:9px;line-height:1.6;color:#8591a0;margin:11px 0 0}
+.live-hold-cta{width:100%;margin-top:15px}
+.live-hold-cta:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
+.passenger-card .demo-disclaimer{line-height:1.7;align-items:flex-start;text-align:left}
+.confirmation-card .confirmation-summary{gap:13px}
+@media(max-width:760px){
+ .seat-section{padding:0 14px;margin-top:29px}
+ .seat-section-head{align-items:flex-start}
+ .seat-section-head h2{font-size:26px}
+ .seat-section-head p{font-size:10px}
+ .seat-layout{grid-template-columns:minmax(0,1fr);gap:12px}
+ .seat-map-card,.passenger-card{padding:16px;border-radius:17px}
+ .seat-map-top b{font-size:17px}
+ .live-seat-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px}
+ .live-seat-list button{min-height:59px}
+ .passenger-card h3{font-size:22px}
+ .live-fare-breakdown{padding:14px}
+ .live-fare-total strong{font-size:22px}
+}
