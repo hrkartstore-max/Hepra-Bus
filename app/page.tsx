@@ -47,6 +47,9 @@ type LiveTrip = {
   }[];
 };
 
+type LiveSeat = { label: string; type: string; status: "available" | "held" | "booked" | "blocked" };
+type LiveHoldResult = { booking_reference: string; status: string; expires_at: string; total_paise: number; payment_integrated: boolean };
+
 type BookingStatusResult = {
   reference: string;
   status: string;
@@ -86,6 +89,17 @@ export default function Home() {
   const [liveSearchMessage, setLiveSearchMessage] = useState("");
   const [liveSort, setLiveSort] = useState<"departure" | "fare">("departure");
   const [acOnly, setAcOnly] = useState(false);
+  const [selectedLiveTrip, setSelectedLiveTrip] = useState<LiveTrip | null>(null);
+  const [liveSeats, setLiveSeats] = useState<LiveSeat[]>([]);
+  const [liveSeatLoading, setLiveSeatLoading] = useState(false);
+  const [liveSeatError, setLiveSeatError] = useState("");
+  const [liveSelectedSeats, setLiveSelectedSeats] = useState<string[]>([]);
+  const [liveContactName, setLiveContactName] = useState("");
+  const [liveContactPhone, setLiveContactPhone] = useState("");
+  const [liveContactEmail, setLiveContactEmail] = useState("");
+  const [livePassengerNames, setLivePassengerNames] = useState<Record<string, string>>({});
+  const [liveHoldLoading, setLiveHoldLoading] = useState(false);
+  const [liveHoldResult, setLiveHoldResult] = useState<LiveHoldResult | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<(typeof routes)[number] | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -128,6 +142,10 @@ export default function Home() {
     setLiveSearchLoading(true);
     setSelectedRoute(null);
     setSelectedSeats([]);
+    setSelectedLiveTrip(null);
+    setLiveSeats([]);
+    setLiveSelectedSeats([]);
+    setLiveHoldResult(null);
     setBookingConfirmed(false);
     setSearched(true);
     document.getElementById("search-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -142,12 +160,84 @@ export default function Home() {
       const trips = Array.isArray(payload.trips) ? payload.trips as LiveTrip[] : [];
       setLiveTrips(trips);
       setLiveSearchMessage(trips.length
-        ? "Live inventory results from the database. Booking and seat holds are not enabled yet."
+        ? "Live inventory results from the database. Select a trip to inspect its current seat inventory."
         : "No live trips are listed for this route and date yet. Sample previews below are for design only and cannot be booked.");
     } catch {
       setLiveSearchMessage("Could not reach live trip search. Sample route previews below are not bookable.");
     } finally {
       setLiveSearchLoading(false);
+    }
+  }
+
+  async function selectLiveTrip(trip: LiveTrip) {
+    setSelectedLiveTrip(trip);
+    setLiveSeats([]);
+    setLiveSelectedSeats([]);
+    setLivePassengerNames({});
+    setLiveHoldResult(null);
+    setLiveSeatError("");
+    setLiveSeatLoading(true);
+    setTimeout(() => document.getElementById("live-seat-selection")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+    try {
+      const response = await fetch(`/api/trips/seats?tripId=${encodeURIComponent(trip.id)}`, { cache: "no-store" });
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) {
+        setLiveSeatError(payload.message || "Seat inventory is temporarily unavailable.");
+        return;
+      }
+      setLiveSeats(Array.isArray(payload.seats) ? payload.seats as LiveSeat[] : []);
+      if (!payload.salesOpen) setLiveSeatError("Sales are closed for this trip or departure time has passed.");
+    } catch {
+      setLiveSeatError("Could not load live seats. Please try again.");
+    } finally {
+      setLiveSeatLoading(false);
+    }
+  }
+
+  async function createLiveHold(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedLiveTrip) return;
+    if (liveSelectedSeats.length !== Number(passengers)) {
+      setLiveSeatError(`Please select exactly ${passengers} seat${passengers === "1" ? "" : "s"}.`);
+      return;
+    }
+    const passengerDetails = liveSelectedSeats.map((seatLabel) => ({
+      seatLabel,
+      passengerName: (livePassengerNames[seatLabel] || "").trim(),
+    }));
+    if (passengerDetails.some((p) => p.passengerName.length < 2)) {
+      setLiveSeatError("Enter a name for every selected passenger seat.");
+      return;
+    }
+    setLiveHoldLoading(true);
+    setLiveSeatError("");
+    try {
+      const response = await fetch("/api/bookings/hold", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tripId: selectedLiveTrip.id,
+          contactName: liveContactName.trim(),
+          phone: liveContactPhone.trim(),
+          email: liveContactEmail.trim(),
+          passengers: passengerDetails,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) {
+        setLiveSeatError(payload.message || (payload.error === "seat_unavailable"
+          ? "A selected seat was just taken. Refresh seat availability and choose again."
+          : "Unable to place a temporary seat hold. Please review your details."));
+        await selectLiveTrip(selectedLiveTrip);
+        return;
+      }
+      setLiveHoldResult(payload.booking as LiveHoldResult);
+      await selectLiveTrip(selectedLiveTrip);
+      setLiveSelectedSeats([]);
+    } catch {
+      setLiveSeatError("Booking service could not be reached. No confirmation has been issued.");
+    } finally {
+      setLiveHoldLoading(false);
     }
   }
 
@@ -206,8 +296,42 @@ export default function Home() {
         <div className="booking-foot"><span><Check size={14} /> No hidden charges</span><span><Check size={14} /> Simple booking experience</span><span><Check size={14} /> Travel on your terms</span></div>
       </section>
 
-      {searched && <section className="results-section" id="search-results"><div className="results-heading"><div><span className="section-overline">YOUR SEARCH</span><h2>{from} <ArrowRight size={21} /> {to}</h2><p>{date} · {passengers} passenger{passengers === "1" ? "" : "s"}</p></div><span className="demo-pill">{liveTrips.length ? "Live database" : "Preview results"}</span></div>{liveSearchLoading && <div className="empty-results"><BusFront size={27} /><div><b>Checking available trips…</b><p>Searching the trip inventory for your selected route and date.</p></div></div>}{!liveSearchLoading && liveTrips.length > 0 && <><div className="live-filter-bar"><label><input type="checkbox" checked={acOnly} onChange={(event) => setAcOnly(event.target.checked)} /> AC buses only</label><label>Sort by <select value={liveSort} onChange={(event) => setLiveSort(event.target.value as "departure" | "fare")}><option value="departure">Departure time</option><option value="fare">Lowest fare</option></select></label><span>{filteredLiveTrips.length} live trip{filteredLiveTrips.length === 1 ? "" : "s"}</span></div>{filteredLiveTrips.length ? <div className="results-grid">{filteredLiveTrips.map((trip) => { const route = Array.isArray(trip.route) ? trip.route[0] : trip.route; return <article className="result-card" key={trip.id}><div className="result-top"><span>{trip.busType || "Bus service"}</span><small>Live listing</small></div><div className="result-times"><div><b>{new Date(trip.departureAt).toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"})}</b><small>{route?.origin_stop || route?.origin_city || from}</small></div><div className="duration"><span /><small><Clock3 size={13} /> {Math.max(0, Math.round((new Date(trip.arrivalAt).getTime() - new Date(trip.departureAt).getTime()) / 60000 / 60))}h approx.</small></div><div className="align-right"><b>{new Date(trip.arrivalAt).toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"})}</b><small>{route?.destination_stop || route?.destination_city || to}</small></div></div><div className="result-bottom"><span>Fare <strong>{formatFare(Math.round(trip.farePaise / 100))}</strong></span><span className="sample-note">Not bookable yet</span></div><button className="choose-seats-button" disabled><Armchair size={16} /> Booking coming soon <ArrowRight size={15} /></button></article>; })}</div> : <div className="empty-results"><BusFront size={27} /><div><b>No trips match these filters.</b><p>Turn off the AC-only filter or change the sort option.</p></div></div>}</>}{!liveSearchLoading && liveTrips.length === 0 && <div className="empty-results"><BusFront size={27} /><div><b>{liveSearchMessage || "No live trips found for this route and date."}</b><p>Sample schedules below are illustrative only; they do not reserve seats or issue tickets.</p></div></div>}{!liveSearchLoading && matchingRoutes.length > 0 && <><div className="results-heading" style={{marginTop: "24px"}}><div><span className="section-overline">DESIGN PREVIEW</span><p>Illustrative sample schedules — not connected to live inventory</p></div><span className="demo-pill">Demo only</span></div><div className="results-grid">{matchingRoutes.map((route) => <article className="result-card" key={"sample-" + route.from + route.to}><div className="result-top"><span>{route.tag}</span><small>Sample fare</small></div><div className="result-times"><div><b>{route.depart}</b><small>{route.from}</small></div><div className="duration"><span /><small><Clock3 size={13} /> {route.time}</small></div><div className="align-right"><b>{route.arrive}</b><small>{route.to}</small></div></div><div className="result-bottom"><span>Starting from <strong>{formatFare(route.fare)}</strong></span><span className="sample-note">Demo only</span></div><button className="choose-seats-button" onClick={() => { setSelectedRoute(route); setSelectedSeats([]); setBookingConfirmed(false); setBookingError(""); setPassengerName(""); setPassengerPhone(""); setTimeout(() => document.getElementById("seat-selection")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0); }}><Armchair size={16} /> Choose seats <ArrowRight size={15} /></button></article>)}</div></>}{!liveSearchLoading && matchingRoutes.length === 0 && liveTrips.length === 0 && <div className="empty-results"><BusFront size={27} /><div><b>No matching sample route.</b><p>Live search is checked separately above; sample previews are available only for selected popular routes.</p></div></div>}</section>}
+      {searched && <section className="results-section" id="search-results"><div className="results-heading"><div><span className="section-overline">YOUR SEARCH</span><h2>{from} <ArrowRight size={21} /> {to}</h2><p>{date} · {passengers} passenger{passengers === "1" ? "" : "s"}</p></div><span className="demo-pill">{liveTrips.length ? "Live database" : "Preview results"}</span></div>{liveSearchLoading && <div className="empty-results"><BusFront size={27} /><div><b>Checking available trips…</b><p>Searching the trip inventory for your selected route and date.</p></div></div>}{!liveSearchLoading && liveTrips.length > 0 && <><div className="live-filter-bar"><label><input type="checkbox" checked={acOnly} onChange={(event) => setAcOnly(event.target.checked)} /> AC buses only</label><label>Sort by <select value={liveSort} onChange={(event) => setLiveSort(event.target.value as "departure" | "fare")}><option value="departure">Departure time</option><option value="fare">Lowest fare</option></select></label><span>{filteredLiveTrips.length} live trip{filteredLiveTrips.length === 1 ? "" : "s"}</span></div>{filteredLiveTrips.length ? <div className="results-grid">{filteredLiveTrips.map((trip) => { const route = Array.isArray(trip.route) ? trip.route[0] : trip.route; return <article className="result-card" key={trip.id}><div className="result-top"><span>{trip.busType || "Bus service"}</span><small>Live listing</small></div><div className="result-times"><div><b>{new Date(trip.departureAt).toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"})}</b><small>{route?.origin_stop || route?.origin_city || from}</small></div><div className="duration"><span /><small><Clock3 size={13} /> {Math.max(0, Math.round((new Date(trip.arrivalAt).getTime() - new Date(trip.departureAt).getTime()) / 60000 / 60))}h approx.</small></div><div className="align-right"><b>{new Date(trip.arrivalAt).toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"})}</b><small>{route?.destination_stop || route?.destination_city || to}</small></div></div><div className="result-bottom"><span>Fare <strong>{formatFare(Math.round(trip.farePaise / 100))}</strong></span><span className="sample-note">Not bookable yet</span></div><button className="choose-seats-button" onClick={() => void selectLiveTrip(trip)}><Armchair size={16} /> View live seats <ArrowRight size={15} /></button></article>; })}</div> : <div className="empty-results"><BusFront size={27} /><div><b>No trips match these filters.</b><p>Turn off the AC-only filter or change the sort option.</p></div></div>}</>}{!liveSearchLoading && liveTrips.length === 0 && <div className="empty-results"><BusFront size={27} /><div><b>{liveSearchMessage || "No live trips found for this route and date."}</b><p>Sample schedules below are illustrative only; they do not reserve seats or issue tickets.</p></div></div>}{!liveSearchLoading && matchingRoutes.length > 0 && <><div className="results-heading" style={{marginTop: "24px"}}><div><span className="section-overline">DESIGN PREVIEW</span><p>Illustrative sample schedules — not connected to live inventory</p></div><span className="demo-pill">Demo only</span></div><div className="results-grid">{matchingRoutes.map((route) => <article className="result-card" key={"sample-" + route.from + route.to}><div className="result-top"><span>{route.tag}</span><small>Sample fare</small></div><div className="result-times"><div><b>{route.depart}</b><small>{route.from}</small></div><div className="duration"><span /><small><Clock3 size={13} /> {route.time}</small></div><div className="align-right"><b>{route.arrive}</b><small>{route.to}</small></div></div><div className="result-bottom"><span>Starting from <strong>{formatFare(route.fare)}</strong></span><span className="sample-note">Demo only</span></div><button className="choose-seats-button" onClick={() => { setSelectedRoute(route); setSelectedSeats([]); setBookingConfirmed(false); setBookingError(""); setPassengerName(""); setPassengerPhone(""); setTimeout(() => document.getElementById("seat-selection")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0); }}><Armchair size={16} /> Choose seats <ArrowRight size={15} /></button></article>)}</div></>}{!liveSearchLoading && matchingRoutes.length === 0 && liveTrips.length === 0 && <div className="empty-results"><BusFront size={27} /><div><b>No matching sample route.</b><p>Live search is checked separately above; sample previews are available only for selected popular routes.</p></div></div>}</section>}
 
+
+      {selectedLiveTrip && <section className="seat-section" id="live-seat-selection">
+        <div className="seat-section-head">
+          <div><span className="section-overline">LIVE INVENTORY · TEMPORARY HOLD</span><h2>Choose your actual seats.</h2><p>{selectedLiveTrip.busLabel} · {selectedLiveTrip.busType} · {new Date(selectedLiveTrip.departureAt).toLocaleString("en-IN")}</p></div>
+          <button className="text-button" onClick={() => { setSelectedLiveTrip(null); setLiveSelectedSeats([]); setLiveHoldResult(null); }}>Close <X size={15} /></button>
+        </div>
+        {liveSeatLoading ? <div className="empty-results"><BusFront size={27} /><div><b>Loading live seats…</b><p>Checking the current database inventory.</p></div></div> : <>
+          {liveHoldResult && <div className="confirmation-card">
+            <div className="confirmation-icon"><Check size={28} /></div><span className="section-overline">TEMPORARY HOLD CREATED</span><h3>{liveHoldResult.booking_reference}</h3>
+            <p>Your seats are temporarily held until {new Date(liveHoldResult.expires_at).toLocaleString("en-IN")}. This is not a confirmed ticket; payment is not integrated.</p>
+            <div className="confirmation-summary"><span>Booking status <b>{liveHoldResult.status}</b></span><span>Temporary total <b>{formatFare(Math.round(liveHoldResult.total_paise / 100))}</b></span><span>Payment <b>Not integrated</b></span></div>
+            <button className="secondary-ticket-button" onClick={() => { setTripLookupReference(liveHoldResult.booking_reference); setTripLookupPhone(liveContactPhone); document.getElementById("my-trips")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>Look up this hold <ArrowRight size={16} /></button>
+          </div>}
+          {!liveHoldResult && <div className="seat-layout">
+            <div className="seat-map-card"><div className="seat-map-top"><div><b>Current seat inventory</b><small>{liveSeats.filter((seat) => seat.status === "available").length} seats available</small></div><button className="text-button" onClick={() => void selectLiveTrip(selectedLiveTrip)}>Refresh <ArrowRight size={15} /></button></div>
+              <div className="seat-legend"><span><i className="legend-available" /> Available</span><span><i className="legend-selected" /> Selected</span><span><i className="legend-occupied" /> Unavailable</span></div>
+              <div className="live-seat-list">{liveSeats.map((seat) => <button key={seat.label} type="button" disabled={seat.status !== "available"} aria-pressed={liveSelectedSeats.includes(seat.label)} className={`seat ${seat.status !== "available" ? "occupied" : liveSelectedSeats.includes(seat.label) ? "selected" : "available"}`} onClick={() => { setLiveSeatError(""); setLiveSelectedSeats((current) => current.includes(seat.label) ? current.filter((label) => label !== seat.label) : current.length < Number(passengers) ? [...current, seat.label] : current); }}>{seat.label}<small>{seat.status === "available" ? "Available" : seat.status === "held" ? "Held" : seat.status === "booked" ? "Booked" : "Unavailable"}</small></button>)}</div>
+              {!liveSeats.length && <p className="seat-map-note">No seats are configured for this trip yet.</p>}
+              <p className="seat-map-note">Seat status can change before you submit. The server rechecks availability when placing the hold.</p>
+            </div>
+            <form className="passenger-card" onSubmit={createLiveHold}>
+              <span className="section-overline">PASSENGER DETAILS</span><h3>Hold your seats</h3>
+              <label className="form-field"><span>CONTACT NAME</span><div><UserRound size={17} /><input required minLength={2} maxLength={120} value={liveContactName} onChange={(event) => setLiveContactName(event.target.value)} placeholder="Booking contact name" autoComplete="name" /></div></label>
+              <label className="form-field"><span>MOBILE NUMBER</span><div><Phone size={17} /><span className="country-code">+91</span><input required inputMode="numeric" maxLength={10} value={liveContactPhone} onChange={(event) => setLiveContactPhone(event.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit mobile number" autoComplete="tel-national" /></div></label>
+              <label className="form-field"><span>EMAIL (OPTIONAL)</span><div><input type="email" maxLength={254} value={liveContactEmail} onChange={(event) => setLiveContactEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" /></div></label>
+              {liveSelectedSeats.map((seat) => <label className="form-field" key={seat}><span>PASSENGER NAME · SEAT {seat}</span><div><UserRound size={17} /><input required minLength={2} maxLength={120} value={livePassengerNames[seat] || ""} onChange={(event) => setLivePassengerNames((current) => ({ ...current, [seat]: event.target.value }))} placeholder={`Name for seat ${seat}`} /></div></label>)}
+              <div className="fare-summary"><span>Fare per seat <b>{formatFare(Math.round(selectedLiveTrip.farePaise / 100))}</b></span><span>Selected seats <b>{liveSelectedSeats.length} / {passengers}</b></span><div><span>Temporary total</span><strong>{formatFare(Math.round(selectedLiveTrip.farePaise / 100) * liveSelectedSeats.length)}</strong></div></div>
+              {liveSeatError && <p className="form-error" role="alert">{liveSeatError}</p>}
+              <button className="search-button" type="submit" disabled={liveHoldLoading || liveSeatLoading || !liveSeats.length}><Armchair size={17} /> {liveHoldLoading ? "Creating hold…" : "Hold seats for 10 minutes"} <ArrowRight size={16} /></button>
+              <p className="demo-disclaimer"><ShieldCheck size={14} /> Temporary reservation only. Payment and ticket confirmation are not available yet.</p>
+            </form>
+          </div>}
+        </>}
+      </section>}
 
       {selectedRoute && <section className="seat-section" id="seat-selection"><div className="seat-section-head"><div><span className="section-overline">STEP 2 OF 3 · SEAT SELECTION</span><h2>Make yourself comfortable.</h2><p>{selectedRoute.from} to {selectedRoute.to} · {date} · Sample schedule {selectedRoute.depart}</p></div><button className="text-button" onClick={() => { setSelectedRoute(null); setSelectedSeats([]); }}>Change route <X size={15} /></button></div>
         {bookingConfirmed ? <div className="confirmation-card"><div className="confirmation-icon"><Check size={28} /></div><span className="section-overline">DEMO BOOKING COMPLETE</span><h3>Your sample journey is ready.</h3><p>This is only a frontend preview. No ticket was issued and no payment was taken.</p><div className="confirmation-summary"><span>Demo reference <b>{bookingReference || "HB-DEMO"}</b></span><span>Route <b>{selectedRoute.from} → {selectedRoute.to}</b></span><span>Passenger <b>{passengerName}</b></span><span>Seats <b>{selectedSeats.join(", ")}</b></span><span>Sample total <b>{formatFare(selectedRoute.fare * selectedSeats.length)}</b></span></div><div className="confirmation-actions"><button className="search-button" onClick={() => window.print()}><Ticket size={16} /> Print demo ticket</button><button className="secondary-ticket-button" onClick={() => { setBookingConfirmed(false); setSelectedRoute(null); setSelectedSeats([]); setSearched(false); document.getElementById("booking-search")?.scrollIntoView({ behavior: "smooth" }); }}>Plan another trip <ArrowRight size={16} /></button></div></div> : <div className="seat-layout"><div className="seat-map-card"><div className="seat-map-top"><div><b>Choose your seats</b><small>Front of bus</small></div><div className="driver-mark"><BusFront size={20} /><span>DRIVER</span></div></div><div className="seat-legend"><span><i className="legend-available" /> Available</span><span><i className="legend-selected" /> Selected</span><span><i className="legend-occupied" /> Unavailable</span></div><div className="bus-seat-map"><div className="seat-columns"><span>A</span><span>B</span><span className="aisle-space" /><span>C</span><span>D</span></div>{Array.from({ length: 6 }, (_, rowIndex) => <div className="seat-row" key={rowIndex}>{["A", "B", "", "C", "D"].map((column, colIndex) => { const aisle = column === ""; const seat = aisle ? "" : `${column}${rowIndex + 1}`; const occupied = ["A2", "D2", "B4", "C5", "D5"].includes(seat); return <span className={aisle ? "seat-cell aisle" : "seat-cell"} key={aisle ? "aisle" : seat}>{aisle ? null : <button type="button" disabled={occupied} aria-pressed={selectedSeats.includes(seat)} aria-label={`Seat ${seat}${occupied ? ", unavailable" : ""}`} className={`seat ${occupied ? "occupied" : selectedSeats.includes(seat) ? "selected" : "available"}`} onClick={() => { setBookingError(""); setSelectedSeats((current) => current.includes(seat) ? current.filter((item) => item !== seat) : current.length < Number(passengers) ? [...current, seat] : current); }}>{seat}</button>}</span>; })}</div>)}</div><p className="seat-map-note">Illustrative seat map only. Actual seat layouts and availability may differ.</p></div>
