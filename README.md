@@ -2,6 +2,13 @@
 
 Responsive Next.js 15 bus booking website starter.
 
+## Supabase setup (server-side only)
+1. Create or choose a dedicated Supabase project for HepraBus.
+2. In Supabase Project Settings -> API, configure the project URL and server-only key as `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in local `.env.local` and Vercel Environment Variables.
+3. Never expose the service-role key with a `NEXT_PUBLIC_` prefix, commit it, or share it in chat.
+4. Review `database/schema.sql` and apply it only to the dedicated HepraBus database. It creates starter booking tables; it does not make the current demo UI live.
+5. Keep server-only database access on the server. Add transactional seat allocation, authentication, payment webhook verification, and live API wiring before accepting real bookings.
+
 ## Run locally
 - Node.js 20+
 - `npm install`
