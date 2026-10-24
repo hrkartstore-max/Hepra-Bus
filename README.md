@@ -17,18 +17,21 @@ Responsive Next.js 15 bus booking website starter.
 ## Current status
 The homepage, responsive search form, popular routes and offer section are a working UI prototype. Search currently displays demo status only. Live operator inventory, seat locking, authenticated bookings, payment processing, e-ticket issuance, admin/operator backend, cancellations and refunds require server-side services and provider integrations. Do not use this prototype to accept real payments.
 
-## Backend foundation (database not connected yet)
+## Supabase backend foundation
 
-A starter PostgreSQL schema is available at `database/schema.sql`. It defines operators, routes, scheduled trips, trip seats, bookings, passenger records and payment records, with basic checks and indexes. Amounts are stored as integer paise to avoid floating-point currency calculations.
+The dedicated Supabase project is `bvxemzzzyfejmiljyjwf` in Mumbai (`ap-south-1`). The schema at `database/schema.sql` has been applied and verified. The seven tables are `operators`, `routes`, `trips`, `trip_seats`, `bookings`, `booking_passengers`, and `payments`.
 
-### Setup outline
-1. Create a dedicated PostgreSQL database with your chosen provider.
-2. Review `database/schema.sql` with your database administrator, then apply it to that database.
-3. Copy `.env.example` to `.env.local` for local development and set `DATABASE_URL` and a strong server-side `AUTH_SECRET`. Do not commit actual credentials.
-4. Implement a server-side database client and authenticated API routes before connecting any UI to the schema.
-5. For production, add transactional seat holds, booking expiry, payment-provider signature verification, idempotency, role-based admin access, audit logs, privacy/retention rules, and cancellation/refund handling.
+### Security status
+- Row Level Security is enabled on all seven public tables.
+- No public RLS policies have been created. This intentionally blocks normal client-role access until policies are reviewed.
+- The migration is recorded in `database/migrations/20261024_enable_rls.sql`.
+- `lib/supabase-admin.ts` creates a server-only Supabase client using `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. The service-role key bypasses RLS and must never be exposed to client components or committed to Git.
+- `GET /api/db/status` performs a minimal server-side connectivity check and does not return database rows or secrets. It also explicitly reports that booking flows are not live.
 
-**Important:** Adding the SQL schema does not connect the current website to PostgreSQL. The present seat selection, booking confirmation, My Trips lookup and admin demo use browser-local demo data. No real bookings, payment processing, ticket issuance, or protected admin operations are available yet. Do not enter real passenger information into the demo.
+### Environment configuration
+Copy `.env.example` to `.env.local` and set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and a strong `AUTH_SECRET`. Add the same values in Vercel Project Settings -> Environment Variables. Never prefix the service-role key with `NEXT_PUBLIC_` and never share it in chat.
+
+**Production status:** The database schema and server-side client foundation exist, but the current UI still uses demo booking data. Real bookings, transactional seat locking/expiry, authenticated customer and admin access, payment webhook verification, rate limiting, and ticket issuance are not implemented or verified. Do not accept real passenger information or payments yet.
 
 
 ### API validation foundation
