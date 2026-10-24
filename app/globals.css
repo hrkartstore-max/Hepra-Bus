@@ -194,3 +194,15 @@ button,input,select{font-family:inherit}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+@media(max-width:760px){
+ .booking-fields>.field:nth-child(1){grid-column:1;grid-row:1}
+ .booking-fields>.swap-button{grid-column:1/-1;grid-row:2;z-index:1}
+ .booking-fields>.field:nth-child(3){grid-column:2;grid-row:1}
+ .booking-fields>.field:nth-child(4){grid-column:1;grid-row:3}
+ .booking-fields>.field:nth-child(5){grid-column:2;grid-row:3}
+ .booking-fields>.search-button{grid-column:1/-1;grid-row:4}
+ .route-card-body{padding:16px 17px 18px}
+}
+.route-card-body{padding:16px 17px 18px}
+.route-card-footer{padding-top:12px}
