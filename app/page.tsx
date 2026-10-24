@@ -1,12 +1,124 @@
 "use client";
-import {useState} from "react";
-import {BusFront,MapPin,CalendarDays,ArrowLeftRight,Search,ShieldCheck,Wallet,Headphones,Ticket,ArrowRight,Star,Menu,X} from "lucide-react";
-const routes=[["Chennai","Bengaluru","₹699","🌆"],["Chennai","Coimbatore","₹449","🌄"],["Chennai","Madurai","₹529","🛕"],["Bengaluru","Chennai","₹649","🌇"],["Chennai","Tiruchirappalli","₹399","🌿"],["Coimbatore","Bengaluru","₹579","⛰️"]];
-export default function Home(){const [from,SF]=useState("Chennai"),[to,ST]=useState("Bengaluru"),[date,SD]=useState(new Date(Date.now()+86400000).toISOString().slice(0,10)),[pass,SP]=useState("1"),[searched,SS]=useState(false),[mobile,SM]=useState(false);
-return <main><header><div className="nav"><a className="brand" href="#"><span className="logo"><BusFront/></span><span><b>hepra<span>bus</span></b><small>YOUR JOURNEY, SIMPLIFIED</small></span></a><nav>{["Home","Bus Tickets","Offers","My Bookings","Help"].map(x=><a key={x} href={x==="Home"?"#":x==="Offers"?"#offers":"#routes"}>{x}</a>)}</nav><button className="navbtn" onClick={()=>SM(!mobile)}>{mobile?<X/>:<Menu/>}</button><a className="btn" href="#routes">My trips</a></div>{mobile&&<div className="mobile">{["Home","Bus Tickets","Offers","My Bookings","Help"].map(x=><a key={x} href="#routes">{x}</a>)}</div>}</header>
-<section className="hero"><div className="hero-inner"><span className="kicker">SMARTER TRAVEL STARTS HERE</span><h1>Go further.<br/>Travel <em>better.</em></h1><p>Comfortable rides, trusted operators and easy booking — all in one place.</p><div className="proof"><span><ShieldCheck/> Secure booking</span><span><Star/> Trusted operators</span><span><Ticket/> Easy e-tickets</span></div><div className="bus-art"><BusFront/><b>HEPRABUS</b></div></div></section>
-<section className="searchbox"><div className="search-head"> <span>● FIND YOUR NEXT RIDE</span><small>One way · India</small></div><div className="fields"><label>FROM<div><MapPin/><select value={from} onChange={e=>SF(e.target.value)}>{["Chennai","Bengaluru","Coimbatore","Madurai","Tiruchirappalli","Hyderabad","Kochi","Mumbai"].map(c=><option key={c}>{c}</option>)}</select></div></label><button className="swap" onClick={()=>{SF(to);ST(from)}}><ArrowLeftRight/></button><label>TO<div><MapPin/><select value={to} onChange={e=>ST(e.target.value)}>{["Bengaluru","Chennai","Coimbatore","Madurai","Tiruchirappalli","Hyderabad","Kochi","Mumbai"].map(c=><option key={c}>{c}</option>)}</select></div></label><label>JOURNEY DATE<div><CalendarDays/><input type="date" value={date} min={new Date().toISOString().slice(0,10)} onChange={e=>SD(e.target.value)}/></div></label><label>PASSENGERS<div><Ticket/><select value={pass} onChange={e=>SP(e.target.value)}>{["1","2","3","4","5","6"].map(n=><option key={n} value={n}>{n} passenger{n==="1"?"":"s"}</option>)}</select></div></label><button className="btn search" onClick={()=>SS(true)}><Search/> Search buses</button></div>{searched&&<p className="demo">Demo search: {from} → {to} · {date} · {pass} passenger(s). Live inventory is not connected yet.</p>}</section>
-<section className="benefits"><div><MapPin/><b>Wide network</b><small>Routes across India</small></div><div><Wallet/><b>Great value</b><small>Transparent fares</small></div><div><ShieldCheck/><b>Secure journey</b><small>Safe booking flow</small></div><div><Headphones/><b>Here to help</b><small>Support when needed</small></div></section>
-<section className="content" id="routes"><div className="section-head"><div><span className="kicker">YOUR NEXT GETAWAY</span><h2>Popular bus routes</h2><p>Discover where travellers are heading</p></div><a href="#routes">Explore routes <ArrowRight/></a></div><div className="grid">{routes.map(r=><button className="route" key={r[0]+r[1]} onClick={()=>{SF(r[0]);ST(r[1]);SS(true);window.scrollTo({top:200,behavior:"smooth"})}}><div className="art">{r[3]}<small>HEPRABUS TRAVEL COLLECTION</small></div><div className="routeinfo"><b>{r[0]} → {r[1]}</b><small>Starting from <strong>{r[2]}</strong></small></div></button>)}</div></section>
-<section className="promowrap" id="offers"><div className="promo"><span className="kicker">A LITTLE MORE ADVENTURE</span><h2>Your next trip<br/>comes with a <em>deal.</em></h2><p>Use code <b>HEPRA20</b> for up to 20% off eligible demo fares.</p><a className="lightbtn" href="#routes">Explore offers <ArrowRight/></a></div><div className="trust"><span className="kicker">TRAVEL WITH CONFIDENCE</span><h2>Every journey,<br/>a little easier.</h2><p><ShieldCheck/> Clear fare details</p><p><Ticket/> Booking overview</p><p><Headphones/> Helpful support</p></div></section>
-<footer><div className="brand"><span className="logo"><BusFront/></span><span><b>hepra<span>bus</span></b><small>YOUR JOURNEY, SIMPLIFIED</small></span></div><p>Thoughtful travel starts with a simpler way to get there.</p><small>© 2026 HepraBus · Website prototype. Live ticketing and payments are not connected.</small></footer></main>}
+
+import { useMemo, useState } from "react";
+import {
+  ArrowDownUp, ArrowRight, BadgeCheck, BusFront, CalendarDays, Check,
+  ChevronRight, Clock3, Headphones, MapPin, Menu, Search, ShieldCheck,
+  Sparkles, Ticket, Wallet, X
+} from "lucide-react";
+
+const cities = ["Chennai", "Bengaluru", "Coimbatore", "Madurai", "Tiruchirappalli", "Hyderabad", "Kochi", "Mumbai"];
+const routes = [
+  { from: "Chennai", to: "Bengaluru", fare: 699, time: "6h 15m", depart: "10:30 PM", arrive: "4:45 AM", tag: "Popular", art: "city" },
+  { from: "Chennai", to: "Coimbatore", fare: 449, time: "7h 00m", depart: "9:45 PM", arrive: "4:45 AM", tag: "Best value", art: "hills" },
+  { from: "Chennai", to: "Madurai", fare: 529, time: "7h 30m", depart: "10:00 PM", arrive: "5:30 AM", tag: "Popular", art: "temple" },
+  { from: "Bengaluru", to: "Chennai", fare: 649, time: "6h 20m", depart: "11:00 PM", arrive: "5:20 AM", tag: "Top route", art: "city" },
+  { from: "Chennai", to: "Tiruchirappalli", fare: 399, time: "5h 45m", depart: "10:15 PM", arrive: "4:00 AM", tag: "Best value", art: "green" },
+  { from: "Coimbatore", to: "Bengaluru", fare: 579, time: "6h 40m", depart: "10:00 PM", arrive: "4:40 AM", tag: "Popular", art: "hills" },
+];
+function localDate(offset = 0) {
+  const date = new Date();
+  date.setDate(date.getDate() + offset);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+const formatFare = (fare: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(fare);
+
+export default function Home() {
+  const [from, setFrom] = useState("Chennai");
+  const [to, setTo] = useState("Bengaluru");
+  const [date, setDate] = useState(localDate(1));
+  const [passengers, setPassengers] = useState("1");
+  const [searched, setSearched] = useState(false);
+  const [error, setError] = useState("");
+  const [mobileMenu, setMobileMenu] = useState(false);
+
+  const matchingRoutes = useMemo(
+    () => routes.filter((route) => route.from === from && route.to === to),
+    [from, to]
+  );
+
+  function searchBuses() {
+    if (from === to) {
+      setError("Choose two different cities to find your journey.");
+      setSearched(false);
+      return;
+    }
+    if (!date || date < localDate()) {
+      setError("Please choose today or a future journey date.");
+      setSearched(false);
+      return;
+    }
+    setError("");
+    setSearched(true);
+    document.getElementById("search-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function selectRoute(route: (typeof routes)[number]) {
+    setFrom(route.from);
+    setTo(route.to);
+    setSearched(true);
+    setError("");
+    document.getElementById("booking-search")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  return (
+    <main>
+      <div className="announcement"><Sparkles size={14} /> Your next adventure starts here <span>Thoughtful travel. Better journeys.</span></div>
+      <header className="site-header">
+        <div className="nav-wrap">
+          <a className="brand" href="#" aria-label="HepraBus home">
+            <span className="brand-mark"><BusFront size={23} strokeWidth={2.4} /></span>
+            <span className="brand-copy"><strong>hepra<span>bus</span></strong><small>YOUR JOURNEY, SIMPLIFIED</small></span>
+          </a>
+          <nav className={mobileMenu ? "main-nav open" : "main-nav"} aria-label="Main navigation">
+            <a className="active" href="#">Home</a><a href="#routes">Bus routes</a><a href="#offers">Offers</a><a href="#why-us">Why HepraBus</a>
+          </nav>
+          <div className="nav-actions"><a className="my-trips" href="#help"><Ticket size={17} /> My trips</a><button className="menu-toggle" aria-label="Toggle menu" onClick={() => setMobileMenu(!mobileMenu)}>{mobileMenu ? <X /> : <Menu />}</button></div>
+        </div>
+      </header>
+
+      <section className="hero">
+        <div className="hero-glow glow-one" /><div className="hero-glow glow-two" />
+        <div className="hero-inner">
+          <div className="hero-copy">
+            <div className="eyebrow light"><span className="eyebrow-dot" /> THE BETTER WAY TO GET THERE</div>
+            <h1>Good journeys.<br /><em>Great stories.</em></h1>
+            <p>From quick getaways to long-awaited reunions, make every mile feel a little easier.</p>
+            <div className="hero-points"><span><ShieldCheck size={17} /> Secure journey</span><span><BadgeCheck size={17} /> Trusted operators</span><span><Ticket size={17} /> Easy e-tickets</span></div>
+          </div>
+          <div className="hero-visual" aria-hidden="true"><div className="sun-disc" /><div className="road road-back" /><div className="road road-front" /><div className="illustration-bus"><div className="bus-windows"><i /><i /><i /></div><div className="bus-front"><span /></div><div className="bus-wheels"><i /><i /></div></div><div className="visual-label"><span className="visual-label-icon"><MapPin size={16} /></span><span><b>Next stop: somewhere wonderful</b><small>Make the journey yours</small></span></div></div>
+        </div>
+        <div className="hero-bottom"><span>MADE FOR THE WAY YOU TRAVEL</span><span className="hero-bottom-line" /><span>INDIA, ONE JOURNEY AT A TIME</span></div>
+      </section>
+
+      <section className="booking-shell" id="booking-search">
+        <div className="booking-heading"><div><span className="section-overline">PLAN YOUR JOURNEY</span><h2>Where would you like to go?</h2></div><span className="one-way">ONE WAY <ChevronRight size={14} /></span></div>
+        <div className="booking-fields">
+          <label className="field"><span>FROM</span><div className="field-control"><MapPin size={19} /><select value={from} onChange={(e) => setFrom(e.target.value)} aria-label="Departure city">{cities.map((city) => <option key={city}>{city}</option>)}</select></div></label>
+          <button className="swap-button" aria-label="Swap departure and destination" onClick={() => { setFrom(to); setTo(from); setError(""); }}><ArrowDownUp size={18} /></button>
+          <label className="field"><span>TO</span><div className="field-control"><MapPin size={19} /><select value={to} onChange={(e) => setTo(e.target.value)} aria-label="Destination city">{cities.map((city) => <option key={city}>{city}</option>)}</select></div></label>
+          <label className="field"><span>JOURNEY DATE</span><div className="field-control"><CalendarDays size={19} /><input type="date" value={date} min={localDate()} onChange={(e) => setDate(e.target.value)} aria-label="Journey date" /></div></label>
+          <label className="field passenger-field"><span>PASSENGERS</span><div className="field-control"><Ticket size={19} /><select value={passengers} onChange={(e) => setPassengers(e.target.value)} aria-label="Number of passengers">{[1, 2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n} {n === 1 ? "passenger" : "passengers"}</option>)}</select></div></label>
+          <button className="search-button" onClick={searchBuses}><Search size={18} /> Search buses <ArrowRight size={17} /></button>
+        </div>
+        {error && <p className="form-error" role="alert">{error}</p>}
+        <div className="booking-foot"><span><Check size={14} /> No hidden charges</span><span><Check size={14} /> Simple booking experience</span><span><Check size={14} /> Travel on your terms</span></div>
+      </section>
+
+      {searched && <section className="results-section" id="search-results"><div className="results-heading"><div><span className="section-overline">YOUR SEARCH</span><h2>{from} <ArrowRight size={21} /> {to}</h2><p>{date} · {passengers} passenger{passengers === "1" ? "" : "s"}</p></div><span className="demo-pill">Preview results</span></div>{matchingRoutes.length ? <div className="results-grid">{matchingRoutes.map((route) => <article className="result-card" key={route.from + route.to}><div className="result-top"><span>{route.tag}</span><small>Sample fare</small></div><div className="result-times"><div><b>{route.depart}</b><small>{route.from}</small></div><div className="duration"><span /><small><Clock3 size={13} /> {route.time}</small></div><div className="align-right"><b>{route.arrive}</b><small>{route.to}</small></div></div><div className="result-bottom"><span>Starting from <strong>{formatFare(route.fare)}</strong></span><span className="sample-note">Demo only</span></div></article>)}</div> : <div className="empty-results"><BusFront size={27} /><div><b>We don't have a sample route for this search yet.</b><p>Try one of the popular routes below. Live schedules are not connected yet.</p></div></div>}</section>}
+
+      <section className="trust-strip" id="why-us"><div className="trust-item"><span><ShieldCheck /></span><div><b>Travel with confidence</b><small>Clarity at every step</small></div></div><div className="trust-item"><span><Wallet /></span><div><b>Fair, clear fares</b><small>Know what to expect</small></div></div><div className="trust-item"><span><Headphones /></span><div><b>Help when you need it</b><small>Support made simple</small></div></div><div className="trust-item"><span><BadgeCheck /></span><div><b>Made for real life</b><small>Booking without the fuss</small></div></div></section>
+
+      <section className="routes-section" id="routes"><div className="section-heading"><div><span className="section-overline">PICK YOUR NEXT DESTINATION</span><h2>Popular routes</h2><p>Start with a favourite. See where the road takes you.</p></div><a href="#booking-search">Plan a trip <ArrowRight size={17} /></a></div><div className="route-grid">{routes.map((route, index) => <button className="route-card" key={route.from + route.to} onClick={() => selectRoute(route)}><div className={"route-art " + route.art}><span className="route-number">0{index + 1}</span><span className="route-art-icon">{route.art === "hills" ? "⌁" : route.art === "temple" ? "⌂" : route.art === "green" ? "✳" : "◉"}</span><span className="route-art-caption">YOUR NEXT CHAPTER</span></div><div className="route-card-body"><div className="route-names"><b>{route.from}</b><span><ArrowRight size={15} /></span><b>{route.to}</b></div><div className="route-meta"><span>Sample fare from</span><strong>{formatFare(route.fare)}</strong></div><div className="route-card-footer"><span>{route.tag}</span><span className="route-cta">View route <ChevronRight size={15} /></span></div></div></button>)}</div></section>
+
+      <section className="offer-section" id="offers"><div className="offer-copy"><span className="section-overline light-overline">A LITTLE MORE REASON TO GO</span><h2>Say yes to<br />the <em>next trip.</em></h2><p>Discover a new place, revisit your favourite, or just take the scenic route.</p><div className="offer-code"><span>YOUR TRAVEL MOOD</span><b>GO SOMEWHERE</b><Sparkles size={17} /></div></div><div className="offer-art" aria-hidden="true"><div className="offer-sun" /><div className="offer-mountain mountain-a" /><div className="offer-mountain mountain-b" /><div className="offer-road" /><div className="offer-stamp">TAKE<br />THE<br />LONG WAY</div></div></section>
+
+      <section className="help-section" id="help"><div className="help-icon"><Headphones size={24} /></div><div><span className="section-overline">HERE WHEN YOU NEED US</span><h2>Travel should feel simple.</h2><p>We're building a smoother way to plan your trip. Booking, payment and live support features will be connected as the platform grows.</p></div><a href="mailto:hello@heprabus.example">Contact the team <ArrowRight size={17} /></a></section>
+
+      <footer className="site-footer"><div className="footer-main"><a className="brand footer-brand" href="#"><span className="brand-mark"><BusFront size={22} /></span><span className="brand-copy"><strong>hepra<span>bus</span></strong><small>YOUR JOURNEY, SIMPLIFIED</small></span></a><p>Thoughtful travel starts with a simpler way to get there.</p><div className="footer-links"><a href="#routes">Popular routes</a><a href="#offers">Offers</a><a href="#why-us">Why HepraBus</a><a href="#help">Help</a></div></div><div className="footer-bottom"><span>© 2026 HepraBus. All rights reserved.</span><span>Website prototype · Live inventory and ticketing are not connected.</span></div></footer>
+    </main>
+  );
+}
