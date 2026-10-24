@@ -231,8 +231,8 @@ export default function Home() {
         await selectLiveTrip(selectedLiveTrip);
         return;
       }
-      setLiveHoldResult(payload.booking as LiveHoldResult);
       await selectLiveTrip(selectedLiveTrip);
+      setLiveHoldResult(payload.booking as LiveHoldResult);
       setLiveSelectedSeats([]);
     } catch {
       setLiveSeatError("Booking service could not be reached. No confirmation has been issued.");
