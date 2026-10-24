@@ -22,3 +22,11 @@ A starter PostgreSQL schema is available at `database/schema.sql`. It defines op
 5. For production, add transactional seat holds, booking expiry, payment-provider signature verification, idempotency, role-based admin access, audit logs, privacy/retention rules, and cancellation/refund handling.
 
 **Important:** Adding the SQL schema does not connect the current website to PostgreSQL. The present seat selection, booking confirmation, My Trips lookup and admin demo use browser-local demo data. No real bookings, payment processing, ticket issuance, or protected admin operations are available yet. Do not enter real passenger information into the demo.
+
+
+### API validation foundation
+
+- `POST /api/bookings/validate` validates a proposed booking payload.
+- `POST /api/bookings/validate?mode=lookup` validates a booking-reference lookup payload.
+- The endpoint returns validation errors for malformed JSON or invalid fields and disables response caching.
+- **These endpoints do not create or retrieve bookings.** Database transactions, seat locking, authenticated access, rate limiting and privacy-safe logging must be implemented before production use.
