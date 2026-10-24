@@ -397,7 +397,7 @@ export default function Home() {
               <div className="fare-summary"><span>Fare per seat <b>{formatFare(Math.round(selectedLiveTrip.farePaise / 100))}</b></span><span>Selected seats <b>{liveSelectedSeats.length} / {passengers}</b></span><div><span>Temporary total</span><strong>{formatFare(Math.round(selectedLiveTrip.farePaise / 100) * liveSelectedSeats.length)}</strong></div></div>
               {liveSeatError && <p className="form-error" role="alert">{liveSeatError}</p>}
               <button className="search-button" type="submit" disabled={liveHoldLoading || liveSeatLoading || !liveSeats.length}><Armchair size={17} /> {liveHoldLoading ? "Creating hold…" : "Hold seats for 10 minutes"} <ArrowRight size={16} /></button>
-              <p className="demo-disclaimer"><ShieldCheck size={14} /> Temporary reservation only. Payment and ticket confirmation are not available yet.</p>
+              <p className="demo-disclaimer"><ShieldCheck size={14} /> Temporary seat hold only. Complete checkout and wait for server-side verification before treating this as a confirmed ticket.</p>
             </form>
           </div>}
         </>}
