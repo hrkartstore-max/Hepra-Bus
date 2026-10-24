@@ -1,12 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { CSSProperties, FormEvent, InputHTMLAttributes } from "react";
 import { ArrowRight, BusFront, CheckCircle2, CircleAlert, KeyRound, Route, ShieldCheck, Ticket } from "lucide-react";
 
 type ApiResult = { ok?: boolean; error?: string; operator?: { id: string; name: string }; route?: { id: string; origin_city: string; destination_city: string }; trip?: { id: string; bus_label: string; departure_at: string }; seatsCreated?: number };
-const inputStyle: React.CSSProperties = { width: "100%", minWidth: 0, border: "1px solid #dce3ec", borderRadius: 10, padding: "12px 13px", background: "#fff", color: "#16263b", outlineOffset: 2 };
-const labelStyle: React.CSSProperties = { display: "grid", gap: 7, fontSize: 12, fontWeight: 700, color: "#536277" };
-const buttonStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, border: 0, borderRadius: 10, padding: "12px 16px", background: "#f15a24", color: "#fff", fontWeight: 800, cursor: "pointer" };
+const inputStyle: CSSProperties = { width: "100%", minWidth: 0, border: "1px solid #dce3ec", borderRadius: 10, padding: "12px 13px", background: "#fff", color: "#16263b", outlineOffset: 2 };
+const labelStyle: CSSProperties = { display: "grid", gap: 7, fontSize: 12, fontWeight: 700, color: "#536277" };
+const buttonStyle: CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, border: 0, borderRadius: 10, padding: "12px 16px", background: "#f15a24", color: "#fff", fontWeight: 800, cursor: "pointer" };
 
 export default function InventoryAdminPage() {
   const [token, setToken] = useState("");
@@ -58,7 +59,7 @@ export default function InventoryAdminPage() {
     } finally { setBusy(""); }
   }
 
-  const field = (label: string, value: string, onChange: (value: string) => void, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
+  const field = (label: string, value: string, onChange: (value: string) => void, props: InputHTMLAttributes<HTMLInputElement> = {}) => (
     <label style={labelStyle}>{label}<input style={inputStyle} value={value} onChange={(e) => onChange(e.target.value)} {...props} /></label>
   );
   const idField = (label: string, value: string, onChange: (value: string) => void) => (
@@ -85,7 +86,7 @@ export default function InventoryAdminPage() {
   }
 
   return <main style={{ minHeight: "100vh", background: "#f5f7fa", color: "#19283b" }}>
-    <header style={{ background: "#10243d", color: "#fff", padding: "22px max(18px, calc((100vw - 1080px)/2)" }}>
+    <header style={{ background: "#10243d", color: "#fff", padding: "22px max(18px, calc((100vw - 1080px)/2))" }}>
       <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 10, color: "#fff", fontWeight: 900, fontSize: 20 }}><span style={{ background: "#f15a24", padding: 9, borderRadius: 10, display: "inline-flex" }}><BusFront size={22} /></span> hepra<span style={{ color: "#ff986b", marginLeft: -10 }}>bus</span><span style={{ fontSize: 11, color: "#aebbc9", fontWeight: 600, marginLeft: 8 }}>INVENTORY ADMIN</span></a>
     </header>
     <div style={{ maxWidth: 1080, margin: "0 auto", padding: "28px 18px 64px" }}>
