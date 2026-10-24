@@ -50,6 +50,12 @@ type LiveTrip = {
 type LiveSeat = { label: string; type: string; status: "available" | "held" | "booked" | "blocked" };
 type LiveHoldResult = { booking_reference: string; status: string; expires_at: string; total_paise: number; payment_integrated: boolean };
 
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
+
 type BookingStatusResult = {
   reference: string;
   status: string;
@@ -100,6 +106,8 @@ export default function Home() {
   const [livePassengerNames, setLivePassengerNames] = useState<Record<string, string>>({});
   const [liveHoldLoading, setLiveHoldLoading] = useState(false);
   const [liveHoldResult, setLiveHoldResult] = useState<LiveHoldResult | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState("");
   const [mobileMenu, setMobileMenu] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<(typeof routes)[number] | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -191,6 +199,66 @@ export default function Home() {
       setLiveSeatError("Could not load live seats. Please try again.");
     } finally {
       setLiveSeatLoading(false);
+    }
+  }
+
+  async function startRazorpayPayment() {
+    if (!liveHoldResult) return;
+    setPaymentLoading(true);
+    setPaymentMessage("");
+    try {
+      const response = await fetch("/api/payments/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference: liveHoldResult.booking_reference, phone: liveContactPhone }),
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) {
+        setPaymentMessage(payload.message || "Payment could not be started. Check the hold status and try again.");
+        return;
+      }
+      if (!window.Razorpay) {
+        await new Promise<void>((resolve, reject) => {
+          const existing = document.querySelector<HTMLScriptElement>('script[data-razorpay-checkout="true"]');
+          if (existing) {
+            if (existing.dataset.loaded === "true") { resolve(); return; }
+            existing.addEventListener("load", () => resolve(), { once: true });
+            existing.addEventListener("error", () => reject(new Error("Checkout script failed")), { once: true });
+            return;
+          }
+          const script = document.createElement("script");
+          script.src = "https://checkout.razorpay.com/v1/checkout.js";
+          script.async = true;
+          script.dataset.razorpayCheckout = "true";
+          script.onload = () => { script.dataset.loaded = "true"; resolve(); };
+          script.onerror = () => reject(new Error("Checkout script failed"));
+          document.body.appendChild(script);
+        });
+      }
+      if (!window.Razorpay) {
+        setPaymentMessage("Payment checkout did not load. Please retry.");
+        return;
+      }
+      const checkout = new window.Razorpay({
+        key: payload.keyId,
+        amount: payload.amount,
+        currency: payload.currency,
+        name: "HepraBus",
+        description: `Bus booking ${payload.bookingReference}`,
+        order_id: payload.orderId,
+        prefill: { name: liveContactName, contact: liveContactPhone, email: liveContactEmail },
+        notes: { booking_reference: payload.bookingReference },
+        theme: { color: "#f47735" },
+        handler: () => {
+          setPaymentMessage("Payment response received. Verifying with the payment provider; your booking is not confirmed until the server webhook updates its status. Refresh My Trips shortly.");
+        },
+        modal: { ondismiss: () => setPaymentMessage("Checkout closed. If you completed payment, wait for server verification before retrying.") },
+      });
+      checkout.open();
+    } catch {
+      setPaymentMessage("Could not load payment checkout. No booking confirmation has been issued.");
+    } finally {
+      setPaymentLoading(false);
     }
   }
 
@@ -309,6 +377,8 @@ export default function Home() {
             <div className="confirmation-icon"><Check size={28} /></div><span className="section-overline">TEMPORARY HOLD CREATED</span><h3>{liveHoldResult.booking_reference}</h3>
             <p>Your seats are temporarily held until {new Date(liveHoldResult.expires_at).toLocaleString("en-IN")}. This is not a confirmed ticket; payment is not integrated.</p>
             <div className="confirmation-summary"><span>Booking status <b>{liveHoldResult.status}</b></span><span>Temporary total <b>{formatFare(Math.round(liveHoldResult.total_paise / 100))}</b></span><span>Payment <b>Not integrated</b></span></div>
+            <button className="search-button" type="button" disabled={paymentLoading} onClick={() => void startRazorpayPayment()}><CreditCard size={16} /> {paymentLoading ? "Preparing checkout…" : "Pay securely with Razorpay"} <ArrowRight size={16} /></button>
+            {paymentMessage && <p className="form-error" role="status">{paymentMessage}</p>}
             <button className="secondary-ticket-button" onClick={() => { setTripLookupReference(liveHoldResult.booking_reference); setTripLookupPhone(liveContactPhone); document.getElementById("my-trips")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>Look up this hold <ArrowRight size={16} /></button>
           </div>}
           {!liveHoldResult && <div className="seat-layout">
