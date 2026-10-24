@@ -375,8 +375,8 @@ export default function Home() {
         {liveSeatLoading ? <div className="empty-results"><BusFront size={27} /><div><b>Loading live seats…</b><p>Checking the current database inventory.</p></div></div> : <>
           {liveHoldResult && <div className="confirmation-card">
             <div className="confirmation-icon"><Check size={28} /></div><span className="section-overline">TEMPORARY HOLD CREATED</span><h3>{liveHoldResult.booking_reference}</h3>
-            <p>Your seats are temporarily held until {new Date(liveHoldResult.expires_at).toLocaleString("en-IN")}. This is not a confirmed ticket; payment is not integrated.</p>
-            <div className="confirmation-summary"><span>Booking status <b>{liveHoldResult.status}</b></span><span>Temporary total <b>{formatFare(Math.round(liveHoldResult.total_paise / 100))}</b></span><span>Payment <b>Not integrated</b></span></div>
+            <p>Your seats are temporarily held until {new Date(liveHoldResult.expires_at).toLocaleString("en-IN")}. This is a temporary seat hold, not a confirmed ticket. Complete checkout and wait for server-side payment verification before treating your booking as confirmed.</p>
+            <div className="confirmation-summary"><span>Booking status <b>{liveHoldResult.status}</b></span><span>Temporary total <b>{formatFare(Math.round(liveHoldResult.total_paise / 100))}</b></span><span>Payment <b>Awaiting verification</b></span></div>
             <button className="search-button" type="button" disabled={paymentLoading} onClick={() => void startRazorpayPayment()}><CreditCard size={16} /> {paymentLoading ? "Preparing checkout…" : "Pay securely with Razorpay"} <ArrowRight size={16} /></button>
             {paymentMessage && <p className="form-error" role="status">{paymentMessage}</p>}
             <button className="secondary-ticket-button" onClick={() => { setTripLookupReference(liveHoldResult.booking_reference); setTripLookupPhone(liveContactPhone); document.getElementById("my-trips")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>Look up this hold <ArrowRight size={16} /></button>
