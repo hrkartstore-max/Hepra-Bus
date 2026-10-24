@@ -12,7 +12,8 @@
     "react": "19.2.9",
     "react-dom": "19.2.9",
     "sharp": "^0.35.5",
-    "lucide-react": "^0.468.0"
+    "lucide-react": "^0.468.0",
+    "@supabase/supabase-js": "^2.76.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
