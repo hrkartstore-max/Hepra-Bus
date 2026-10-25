@@ -130,7 +130,7 @@ export default function Home() {
 
   const filteredLiveTrips = useMemo(() => {
     const trips = liveTrips.filter((trip) => {
-      if (acOnly && !/\\bac\\b/i.test(trip.busType)) return false;
+      if (acOnly && !/\bac\b/i.test(trip.busType)) return false;
       if (busStyle !== "all" && !trip.busType.toLowerCase().includes(busStyle)) return false;
       if (departureWindow !== "any") {
         const hour = new Date(trip.departureAt).getHours();
