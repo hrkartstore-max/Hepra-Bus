@@ -404,3 +404,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   .trip-lookup-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .trip-lookup-grid b{font-size:11px;line-height:1.5}
 }
+
+
+/* Search refinement controls */
+.filter-reset-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;margin-top:10px;padding:0 13px;border:1px solid #d8c9f5;border-radius:9px;background:#f5f0ff;color:#5b2bb4;font-size:11px;font-weight:800}
+.filter-reset-button:hover{background:#ebe2ff;border-color:#6B35D5}
+.live-filter-bar label{min-height:36px}
+.live-filter-bar select{min-height:38px;max-width:100%;font-size:12px}
+@media(max-width:760px){
+ .live-filter-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:10px}
+ .live-filter-bar label{min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:5px;font-size:10px}
+ .live-filter-bar label:first-child{grid-column:1/-1;flex-direction:row;align-items:center}
+ .live-filter-bar label select{width:100%;min-width:0}
+ .live-filter-bar>span{grid-column:1/-1;width:auto;margin:0;padding-top:7px;border-top:1px solid #e7e8f0}
+}
