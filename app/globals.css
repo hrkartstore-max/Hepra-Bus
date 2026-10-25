@@ -948,3 +948,32 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 #my-trips .form-error{display:flex;align-items:flex-start;gap:9px;padding:13px 15px;border:1px solid #f5cbd0;border-radius:12px;background:#fff4f5;color:#9f2636;font-size:12px;line-height:1.6}
 #my-trips .form-error:before{content:"!";display:grid;place-items:center;width:19px;height:19px;flex:0 0 auto;border-radius:50%;background:#f9dce0;color:#9f2636;font-weight:900}
 @media(prefers-reduced-motion:reduce){.lookup-spinner{animation:none;border-right-color:currentColor}}
+
+
+/* V7 ticket status guidance */
+.ticket-status-guide{margin:0 0 18px;padding:16px 17px;border:1px solid #e9e2f3;border-radius:15px;background:#fcfaff}
+.ticket-status-guide-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.ticket-status-guide-head>b{font-size:13px;color:#302a3b}
+.ticket-status-guide-head>span{padding:6px 9px;border-radius:999px;background:#f0eaff;color:#5b2cb5;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.4px}
+.ticket-status-guide.guide-confirmed .ticket-status-guide-head>span{background:#e6f8ef;color:#08784e}
+.ticket-status-guide.guide-pending .ticket-status-guide-head>span{background:#fff3dc;color:#93610a}
+.ticket-status-guide.guide-expired .ticket-status-guide-head>span,.ticket-status-guide.guide-cancelled .ticket-status-guide-head>span,.ticket-status-guide.guide-failed .ticket-status-guide-head>span{background:#ffe9eb;color:#a32636}
+.ticket-status-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ticket-status-step{display:flex;align-items:flex-start;gap:9px;min-width:0}
+.ticket-status-step>span{width:25px;height:25px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:#eee8fa;color:#6b35d5}
+.ticket-status-step.is-done>span{background:#dff6e9;color:#08784e}
+.ticket-status-step.is-current>span{background:#fff0cf;color:#93610a}
+.ticket-status-step.is-stopped>span{background:#ffe3e7;color:#a32636}
+.ticket-status-step>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ticket-status-step b{font-size:11px;color:#302a3b}
+.ticket-status-step small{font-size:10px;line-height:1.5;color:#7e768d}
+@media(max-width:640px){
+ .ticket-status-guide{padding:13px 11px;border-radius:12px;margin-bottom:14px}
+ .ticket-status-guide-head{align-items:flex-start;flex-direction:column;gap:7px}
+ .ticket-status-steps{grid-template-columns:1fr;gap:11px}
+ .ticket-status-step small{font-size:10px}
+}
+@media print{
+ #my-trips .ticket-status-guide{background:#fff!important;border:1px solid #ddd!important}
+ #my-trips .ticket-status-guide *{visibility:visible!important}
+}
