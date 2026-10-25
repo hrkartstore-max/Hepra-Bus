@@ -50,6 +50,21 @@ CREATE TABLE IF NOT EXISTS trips (
 
 CREATE INDEX IF NOT EXISTS trips_route_departure_idx ON trips(route_id, departure_at) WHERE sales_open = TRUE;
 
+CREATE TABLE IF NOT EXISTS route_stops (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  route_id UUID NOT NULL REFERENCES routes(id) ON DELETE CASCADE,
+  stop_type TEXT NOT NULL CHECK (stop_type IN ('boarding', 'dropping')),
+  stop_name TEXT NOT NULL CHECK (length(trim(stop_name)) BETWEEN 2 AND 160),
+  address TEXT,
+  landmark TEXT,
+  reporting_minutes INTEGER NOT NULL DEFAULT 15 CHECK (reporting_minutes BETWEEN 0 AND 180),
+  sort_order INTEGER NOT NULL DEFAULT 0 CHECK (sort_order >= 0),
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (route_id, stop_type, stop_name)
+);
+CREATE INDEX IF NOT EXISTS route_stops_route_type_idx ON route_stops(route_id, stop_type, active, sort_order);
+
 CREATE TABLE IF NOT EXISTS trip_seats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   trip_id UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
@@ -116,6 +131,10 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 CREATE INDEX IF NOT EXISTS payments_booking_idx ON payments(booking_id, created_at DESC);
+
+ALTER TABLE route_stops ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON route_stops FROM anon, authenticated;
+GRANT ALL ON route_stops TO service_role;
 
 -- This schema intentionally contains no public RLS policies or application credentials.
 -- Before production: configure database roles/permissions, authenticated admin access,
