@@ -49,6 +49,7 @@ type LiveTrip = {
 };
 
 type LiveSeat = { label: string; type: string; status: "available" | "held" | "booked" | "blocked" };
+type RouteStop = { id: string; stop_name: string; stop_type: "boarding" | "dropping"; address: string | null; landmark: string | null; reporting_minutes: number; sort_order: number };
 type LiveHoldResult = { booking_reference: string; status: string; expires_at: string; total_paise: number; payment_integrated: boolean };
 
 declare global {
@@ -108,6 +109,8 @@ export default function Home() {
   const [liveSelectedSeats, setLiveSelectedSeats] = useState<string[]>([]);
   const [selectedBoardingPoint, setSelectedBoardingPoint] = useState("");
   const [selectedDroppingPoint, setSelectedDroppingPoint] = useState("");
+  const [routeStops, setRouteStops] = useState<RouteStop[]>([]);
+  const [routeStopsLoading, setRouteStopsLoading] = useState(false);
   const [liveContactName, setLiveContactName] = useState("");
   const [liveContactPhone, setLiveContactPhone] = useState("");
   const [liveContactEmail, setLiveContactEmail] = useState("");
@@ -203,6 +206,8 @@ export default function Home() {
     const routeData = Array.isArray(trip.route) ? trip.route[0] : trip.route;
     setSelectedBoardingPoint(routeData?.origin_stop || routeData?.origin_city || "");
     setSelectedDroppingPoint(routeData?.destination_stop || routeData?.destination_city || "");
+    setRouteStops([]);
+    setRouteStopsLoading(true);
     setLiveSeats([]);
     setLiveSelectedSeats([]);
     setLivePassengerNames({});
@@ -211,6 +216,17 @@ export default function Home() {
     setLiveSeatLoading(true);
     setTimeout(() => document.getElementById("live-seat-selection")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
     try {
+      const stopsResponse = await fetch(`/api/trips/stops?tripId=${encodeURIComponent(trip.id)}`, { cache: "no-store" });
+      const stopsPayload = await stopsResponse.json();
+      if (stopsResponse.ok && stopsPayload.ok && Array.isArray(stopsPayload.stops)) {
+        const stops = stopsPayload.stops as RouteStop[];
+        setRouteStops(stops);
+        const routeInfo = Array.isArray(trip.route) ? trip.route[0] : trip.route;
+        const boardStops = stops.filter((stop) => stop.stop_type === "boarding");
+        const dropStops = stops.filter((stop) => stop.stop_type === "dropping");
+        setSelectedBoardingPoint(boardStops[0]?.stop_name || routeInfo?.origin_stop || routeInfo?.origin_city || "");
+        setSelectedDroppingPoint(dropStops[0]?.stop_name || routeInfo?.destination_stop || routeInfo?.destination_city || "");
+      }
       const response = await fetch(`/api/trips/seats?tripId=${encodeURIComponent(trip.id)}`, { cache: "no-store" });
       const payload = await response.json();
       if (!response.ok || !payload.ok) {
@@ -223,6 +239,7 @@ export default function Home() {
       setLiveSeatError("Could not load live seats. Please try again.");
     } finally {
       setLiveSeatLoading(false);
+      setRouteStopsLoading(false);
     }
   }
 
@@ -425,8 +442,8 @@ export default function Home() {
             </div>
             <form className="passenger-card" onSubmit={createLiveHold}>
               <span className="section-overline">STEP 2 · TRAVELLER INFO</span><h3>Who is travelling?</h3><p className="passenger-intro">Add the contact details and a name for every selected seat.</p>
-              <label className="form-field"><span>BOARDING POINT</span><div><MapPin size={17} /><select required value={selectedBoardingPoint} onChange={(event) => setSelectedBoardingPoint(event.target.value)}><option value="">Choose boarding point</option>{Array.from(new Set([...(Array.isArray(selectedLiveTrip.route) ? selectedLiveTrip.route[0] : selectedLiveTrip.route)?.origin_stop || "", (Array.isArray(selectedLiveTrip.route) ? selectedLiveTrip.route[0] : selectedLiveTrip.route)?.origin_city || ""].filter(Boolean))).map((point) => <option key={point} value={point}>{point}</option>)}</select></div></label>
-              <label className="form-field"><span>DROPPING POINT</span><div><MapPin size={17} /><select required value={selectedDroppingPoint} onChange={(event) => setSelectedDroppingPoint(event.target.value)}><option value="">Choose dropping point</option>{Array.from(new Set([...(Array.isArray(selectedLiveTrip.route) ? selectedLiveTrip.route[0] : selectedLiveTrip.route)?.destination_stop || "", (Array.isArray(selectedLiveTrip.route) ? selectedLiveTrip.route[0] : selectedLiveTrip.route)?.destination_city || ""].filter(Boolean))).map((point) => <option key={point} value={point}>{point}</option>)}</select></div></label>
+              <label className="form-field"><span>BOARDING POINT</span><div><MapPin size={17} /><select required value={selectedBoardingPoint} onChange={(event) => setSelectedBoardingPoint(event.target.value)} disabled={routeStopsLoading}><option value="">Choose boarding point</option>{(routeStops.filter((stop) => stop.stop_type === "boarding").length ? routeStops.filter((stop) => stop.stop_type === "boarding") : [{id:"legacy-board",stop_name:(Array.isArray(selectedLiveTrip.route)?selectedLiveTrip.route[0]:selectedLiveTrip.route)?.origin_stop || (Array.isArray(selectedLiveTrip.route)?selectedLiveTrip.route[0]:selectedLiveTrip.route)?.origin_city || "",stop_type:"boarding" as const,address:null,landmark:null,reporting_minutes:15,sort_order:0}]).map((stop) => <option key={stop.id} value={stop.stop_name}>{stop.stop_name}{stop.address ? " · "+stop.address : ""}{stop.landmark ? " ("+stop.landmark+")" : ""} · report "+stop.reporting_minutes+" min early</option>)}</select></div></label>
+              <label className="form-field"><span>DROPPING POINT</span><div><MapPin size={17} /><select required value={selectedDroppingPoint} onChange={(event) => setSelectedDroppingPoint(event.target.value)} disabled={routeStopsLoading}><option value="">Choose dropping point</option>{(routeStops.filter((stop) => stop.stop_type === "dropping").length ? routeStops.filter((stop) => stop.stop_type === "dropping") : [{id:"legacy-drop",stop_name:(Array.isArray(selectedLiveTrip.route)?selectedLiveTrip.route[0]:selectedLiveTrip.route)?.destination_stop || (Array.isArray(selectedLiveTrip.route)?selectedLiveTrip.route[0]:selectedLiveTrip.route)?.destination_city || "",stop_type:"dropping" as const,address:null,landmark:null,reporting_minutes:0,sort_order:0}]).map((stop) => <option key={stop.id} value={stop.stop_name}>{stop.stop_name}{stop.address ? " · "+stop.address : ""}{stop.landmark ? " ("+stop.landmark+")" : ""}</option>)}</select></div></label>
               <label className="form-field"><span>CONTACT NAME</span><div><UserRound size={17} /><input required minLength={2} maxLength={120} value={liveContactName} onChange={(event) => setLiveContactName(event.target.value)} placeholder="Booking contact name" autoComplete="name" /></div></label>
               <label className="form-field"><span>MOBILE NUMBER</span><div><Phone size={17} /><span className="country-code">+91</span><input required inputMode="numeric" maxLength={10} value={liveContactPhone} onChange={(event) => setLiveContactPhone(event.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit mobile number" autoComplete="tel-national" /></div></label>
               <label className="form-field"><span>EMAIL (OPTIONAL)</span><div><input type="email" maxLength={254} value={liveContactEmail} onChange={(event) => setLiveContactEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" /></div></label>
