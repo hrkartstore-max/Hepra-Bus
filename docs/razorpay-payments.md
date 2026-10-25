@@ -41,3 +41,8 @@ If payment is captured after the seat hold has expired, or the held-seat invento
 - Verify Vercel environment variables and deployment logs.
 - Implement customer support, refund/cancellation rules, privacy/retention policies, and ticket generation.
 - Do not describe a booking as ticketed until the database status is confirmed and a ticketing workflow exists.
+
+
+## Operations monitoring
+
+Staff can open `/admin/operations` after signing in at `/admin/verification`. The read-only dashboard summarizes pending bookings, pending holds past expiry, confirmed and expired bookings, succeeded payment records, open reconciliation cases, and succeeded payments whose booking is not confirmed. It does not run cleanup, confirm bookings, or issue refunds. Use `/admin/reconciliation` for case tracking and review the Razorpay dashboard before resolving payment exceptions.
