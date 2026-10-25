@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const db = getSupabaseAdmin();
     const [
       pending, expiredPending, confirmed, succeededPayments, openCases,
-      expiredCases, unconfirmedSucceededPayments, recentCases,
+      expiredCases, unconfirmedSucceededPayments, recentCases, cronRuns,
     ] = await Promise.all([
       db.from("bookings").select("id", { count: "exact", head: true }).eq("status", "pending"),
       db.from("bookings").select("id", { count: "exact", head: true }).eq("status", "pending").lte("expires_at", now),
@@ -27,8 +27,10 @@ export async function GET(request: NextRequest) {
       db.from("payments").select("id,bookings!inner(status)", { count: "exact", head: true }).eq("status", "succeeded").neq("bookings.status", "confirmed"),
       db.from("payment_reconciliation_cases").select("id,reason,status,created_at,provider_payment_id,bookings(booking_reference,status),payments(amount_paise,currency)")
         .order("created_at", { ascending: false }).limit(5),
+      db.from("cron_job_runs").select("id,job_name,status,started_at,finished_at,released_seats,error_code")
+        .eq("job_name", "release-expired-booking-holds").order("started_at", { ascending: false }).limit(8),
     ]);
-    const errors = [pending, expiredPending, confirmed, succeededPayments, openCases, expiredCases, unconfirmedSucceededPayments, recentCases].filter(x => x.error);
+    const errors = [pending, expiredPending, confirmed, succeededPayments, openCases, expiredCases, unconfirmedSucceededPayments, recentCases, cronRuns].filter(x => x.error);
     if (errors.length) {
       console.error("Operations monitoring query failed", errors.map(x => x.error?.code));
       return json({ ok: false, error: "monitoring_unavailable" }, 503);
@@ -46,6 +48,7 @@ export async function GET(request: NextRequest) {
         succeededPaymentsWithoutConfirmedBooking: unconfirmedSucceededPayments.count ?? 0,
       },
       recentCases: recentCases.data ?? [],
+      cronRuns: cronRuns.data ?? [],
     });
   } catch {
     return json({ ok: false, error: "server_not_configured" }, 503);
