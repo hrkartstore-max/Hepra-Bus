@@ -95,6 +95,23 @@ export async function POST(request: NextRequest) {
       return json({ ok: true, route: data }, 201);
     }
 
+    if (action === "create_route_stop") {
+      const routeId = input.routeId;
+      const stopType = text(input.stopType, 20);
+      const stopName = text(input.stopName, 160);
+      const address = text(input.address, 240);
+      const landmark = text(input.landmark, 160);
+      const reportingMinutes = input.reportingMinutes === undefined || input.reportingMinutes === "" ? (stopType === "boarding" ? 15 : 0) : Number(input.reportingMinutes);
+      const sortOrder = input.sortOrder === undefined || input.sortOrder === "" ? 0 : Number(input.sortOrder);
+      if (!uuid(routeId) || !["boarding", "dropping"].includes(stopType) || stopName.length < 2 || !Number.isInteger(reportingMinutes) || reportingMinutes < 0 || reportingMinutes > 180 || !Number.isInteger(sortOrder) || sortOrder < 0) return json({ ok: false, error: "invalid_route_stop" }, 400);
+      const { data: route, error: routeError } = await supabase.from("routes").select("id").eq("id", routeId).eq("active", true).maybeSingle();
+      if (routeError) return json({ ok: false, error: "inventory_read_failed" }, 503);
+      if (!route) return json({ ok: false, error: "active_route_not_found" }, 400);
+      const { data, error } = await supabase.from("route_stops").upsert({ route_id: routeId, stop_type: stopType, stop_name: stopName, address: address || null, landmark: landmark || null, reporting_minutes: reportingMinutes, sort_order: sortOrder, active: true }, { onConflict: "route_id,stop_type,stop_name" }).select("id,route_id,stop_type,stop_name,address,landmark,reporting_minutes,sort_order,active").single();
+      if (error || !data) { console.error("Admin route stop write failed", { code: error?.code }); return json({ ok: false, error: "route_stop_write_failed" }, 503); }
+      return json({ ok: true, stop: data }, 201);
+    }
+
     if (action === "create_trip") {
       const routeId = input.routeId;
       const busLabel = text(input.busLabel, 80);
@@ -154,7 +171,7 @@ export async function POST(request: NextRequest) {
       return json({ ok: true, trip, seatsCreated: seatLabels.length }, 201);
     }
 
-    return json({ ok: false, error: "unsupported_action", allowedActions: ["create_operator", "create_route", "create_trip"] }, 400);
+    return json({ ok: false, error: "unsupported_action", allowedActions: ["create_operator", "create_route", "create_route_stop", "create_trip"] }, 400);
   } catch {
     return json({ ok: false, error: "server_not_configured" }, 503);
   }
