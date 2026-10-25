@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseAdmin();
     const { data: booking, error } = await supabase
       .from("bookings")
-      .select("id, booking_reference, trip_id, status, currency, total_paise, expires_at, confirmed_at, created_at, boarding_point, dropping_point")
+      .select("id, booking_reference, trip_id, status, currency, total_paise, expires_at, confirmed_at, created_at, boarding_point, dropping_point, boarding_reporting_minutes, dropping_reporting_minutes")
       .eq("booking_reference", reference)
       .eq("contact_phone", phone)
       .maybeSingle();
@@ -91,6 +91,8 @@ export async function POST(request: NextRequest) {
         totalPaise: booking.total_paise,
         boardingPoint: booking.boarding_point,
         droppingPoint: booking.dropping_point,
+        boardingReportingMinutes: booking.boarding_reporting_minutes,
+        droppingReportingMinutes: booking.dropping_reporting_minutes,
         expiresAt: booking.expires_at,
         confirmedAt: booking.confirmed_at,
         createdAt: booking.created_at,
