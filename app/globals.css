@@ -835,3 +835,106 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 @media print{
  .live-hold-cta,.text-button,.secondary-ticket-button{display:none!important}
 }
+
+
+/* V5 premium e-ticket, journey timeline and print-ready layout */
+.ticket-card{
+  position:relative;isolation:isolate;overflow:hidden;
+  background:linear-gradient(180deg,#fff 0%,#fff 72%,#fcfaff 100%);
+  border:1px solid #e8e2f2;border-radius:24px;
+  box-shadow:0 18px 48px #2c17410d;
+}
+.ticket-card:before{
+  content:"";position:absolute;z-index:-1;left:0;right:0;top:0;height:5px;
+  background:linear-gradient(90deg,#d93645 0%,#d93645 38%,#6b35d5 100%);
+}
+.ticket-card .trip-lookup-result-head{align-items:center;gap:14px}
+.ticket-brand-print{display:flex;flex-direction:column;gap:3px}
+.ticket-brand-print strong{font-size:25px;letter-spacing:-1.1px;line-height:1.05}
+.ticket-brand-print small{font-size:8px;letter-spacing:1.2px;font-weight:850;color:#81798e}
+.ticket-print-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;font-size:12px;font-weight:850}
+.ticket-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 0 15px;border-bottom:1px dashed #e4dced}
+.ticket-title-row h3{font-size:clamp(22px,3vw,30px);letter-spacing:-.8px;margin:5px 0 0;overflow-wrap:anywhere}
+.ticket-title-row .status-pill{padding:8px 12px;border-radius:999px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+.ticket-qr-row{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:20px 0}
+.ticket-qr-row>div{display:flex;flex-direction:column;align-items:flex-start;gap:7px;max-width:360px}
+.ticket-qr-row>div>b{font-size:14px;color:#2a2534}
+.ticket-qr-row>div>small{font-size:11px;line-height:1.6;color:#777184}
+.ticket-qr-row>div>a{font-size:11px;font-weight:850;color:#5b2cb5;text-decoration:underline;text-underline-offset:3px}
+.ticket-qr{display:block;flex:0 0 auto;width:112px;height:112px;padding:7px;border:1px solid #e8e1f2;border-radius:14px;background:#fff;object-fit:contain}
+.ticket-route-banner{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;padding:20px}
+.ticket-route-banner>div{min-width:0;display:flex;flex-direction:column;gap:7px}
+.ticket-route-banner>div:last-child{text-align:right;align-items:flex-end}
+.ticket-route-banner>svg{color:#6b35d5;flex:0 0 auto}
+.ticket-route-banner small{font-size:9px;letter-spacing:1.2px;font-weight:900;color:#837b92}
+.ticket-route-banner strong{font-size:clamp(17px,2.6vw,25px);line-height:1.15;letter-spacing:-.6px;color:#292433;overflow-wrap:anywhere}
+.ticket-trip-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:17px 0;border-bottom:1px solid #eee9f5}
+.ticket-trip-meta>span{display:flex;flex-direction:column;gap:7px;padding:0 14px;border-right:1px solid #eee9f5;font-size:9px;letter-spacing:.8px;font-weight:900;color:#898194}
+.ticket-trip-meta>span:first-child{padding-left:0}
+.ticket-trip-meta>span:last-child{border-right:0;padding-right:0}
+.ticket-trip-meta b{font-size:12px;letter-spacing:0;line-height:1.45;color:#302a3b;font-weight:800;overflow-wrap:anywhere}
+.ticket-details-heading{justify-content:flex-start;margin-top:6px;padding:18px 0 12px}
+.ticket-details-heading h3{font-size:19px;margin:3px 0 0}
+.ticket-details-heading .confirmation-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border-radius:13px}
+.trip-lookup-grid{gap:10px;margin-top:0}
+.trip-lookup-grid>span{display:flex;flex-direction:column;gap:7px;padding:13px;border:1px solid #eee9f5;border-radius:12px;background:#fff;font-size:10px;color:#81798d}
+.trip-lookup-grid>span>b{font-size:12px;color:#302a3b;line-height:1.45;overflow-wrap:anywhere}
+.ticket-card .passenger-detail,.ticket-card .passenger-row{break-inside:avoid}
+.ticket-card .status-pill-confirmed{box-shadow:inset 0 0 0 1px #bcebd5}
+.ticket-card .status-pill-pending{box-shadow:inset 0 0 0 1px #f3dfb1}
+.ticket-card .status-pill-expired,.ticket-card .status-pill-cancelled,.ticket-card .status-pill-failed{box-shadow:inset 0 0 0 1px #f4c4ca}
+.confirmation-card{border:1px solid #e7def7;border-radius:22px;background:linear-gradient(145deg,#fff 0%,#fbf8ff 100%);box-shadow:0 15px 35px #2c17410b;padding:clamp(20px,3vw,30px)}
+.confirmation-card>h3{font-size:clamp(23px,3vw,31px);letter-spacing:-.8px;overflow-wrap:anywhere}
+.confirmation-card .confirmation-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+.confirmation-card .confirmation-summary>span{display:flex;flex-direction:column;gap:7px;padding:13px;border:1px solid #ebe4f5;border-radius:12px;background:#fff;font-size:10px;color:#827a8e}
+.confirmation-card .confirmation-summary b{font-size:12px;color:#302a3b;line-height:1.45;overflow-wrap:anywhere}
+.confirmation-card .search-button{min-height:50px}
+@media(max-width:640px){
+ .ticket-card{border-radius:17px;padding:16px!important}
+ .ticket-brand-print strong{font-size:22px}
+ .ticket-brand-print small{font-size:7px;letter-spacing:.7px}
+ .ticket-print-button{padding:9px;font-size:10px;white-space:nowrap}
+ .ticket-title-row{align-items:flex-start;gap:8px;padding:15px 0 13px}
+ .ticket-title-row h3{font-size:22px}
+ .ticket-title-row .status-pill{font-size:8px;padding:7px 8px}
+ .ticket-qr-row{gap:10px;padding:16px 0}
+ .ticket-qr-row>div>b{font-size:12px}
+ .ticket-qr-row>div>small,.ticket-qr-row>div>a{font-size:10px}
+ .ticket-qr{width:82px;height:82px;padding:5px;border-radius:10px}
+ .ticket-route-banner{gap:8px;padding:14px 11px;border-radius:12px}
+ .ticket-route-banner>svg{width:16px}
+ .ticket-route-banner strong{font-size:16px;letter-spacing:-.4px}
+ .ticket-route-banner small{font-size:8px;letter-spacing:.8px}
+ .ticket-trip-meta{grid-template-columns:1fr;gap:0;padding:7px 0}
+ .ticket-trip-meta>span,.ticket-trip-meta>span:first-child,.ticket-trip-meta>span:last-child{padding:11px 0;border-right:0;border-bottom:1px solid #f0edf5;gap:5px}
+ .ticket-trip-meta>span:last-child{border-bottom:0}
+ .ticket-trip-meta b{font-size:12px}
+ .ticket-details-heading{padding:15px 0 10px}
+ .trip-lookup-grid{grid-template-columns:1fr 1fr;gap:8px}
+ .trip-lookup-grid>span{padding:11px 9px;font-size:9px}
+ .trip-lookup-grid>span>b{font-size:11px}
+ .confirmation-card{padding:19px 15px;border-radius:17px}
+ .confirmation-card .confirmation-summary{grid-template-columns:1fr;gap:8px}
+ .confirmation-card .confirmation-summary>span{padding:11px 12px;flex-direction:row;justify-content:space-between;align-items:center;gap:12px}
+ .confirmation-card .confirmation-summary b{text-align:right}
+}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ html,body{background:#fff!important;color:#111!important;font-size:10pt!important}
+ body *{visibility:hidden!important}
+ #my-trips,#my-trips *{visibility:visible!important}
+ #my-trips{position:absolute!important;left:0!important;top:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important}
+ #my-trips> :not(.trip-lookup-result){display:none!important}
+ #my-trips .trip-lookup-result{display:block!important;position:relative!important;width:100%!important;margin:0!important;padding:7mm!important;border:1px solid #d8d2df!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;background:#fff!important;color:#111!important}
+ #my-trips .trip-lookup-result *{visibility:visible!important}
+ #my-trips .ticket-print-button,#my-trips .secondary-ticket-button,#my-trips .text-button,#my-trips button,#my-trips form,#my-trips .form-error{display:none!important}
+ #my-trips .ticket-route-banner{background:#f6f2ff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ #my-trips .ticket-qr-row,#my-trips .ticket-route-banner,#my-trips .ticket-trip-meta,#my-trips .trip-lookup-grid{break-inside:avoid;page-break-inside:avoid}
+ #my-trips .ticket-qr{width:28mm!important;height:28mm!important}
+ #my-trips .ticket-route-banner strong{font-size:17pt!important}
+ #my-trips .ticket-title-row h3{font-size:20pt!important}
+ #my-trips .trip-lookup-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #my-trips .trip-lookup-grid>span{border:1px solid #ddd!important;background:#fff!important}
+ #my-trips .ticket-trip-meta b,#my-trips .trip-lookup-grid>span>b{color:#111!important}
+ .site-header,.site-footer,.announcement,.hero,.booking-shell,.results-section,.seat-section,.trust-strip,.routes-section,.offer-section,.help-section{display:none!important}
+}
