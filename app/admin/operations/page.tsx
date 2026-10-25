@@ -9,6 +9,7 @@ type Metrics = {
   succeededPayments: number; openReconciliationCases: number; expiredBookings: number;
   succeededPaymentsWithoutConfirmedBooking: number;
 };
+type CronRun = { id: string; job_name: string; status: "running" | "succeeded" | "failed"; started_at: string; finished_at?: string | null; released_seats?: number | null; error_code?: string | null };
 type RecentCase = { id: string; reason: string; status: string; created_at: string; provider_payment_id: string; bookings?: { booking_reference?: string; status?: string } | Array<{ booking_reference?: string; status?: string }> | null; payments?: { amount_paise?: number; currency?: string } | Array<{ amount_paise?: number; currency?: string }> | null };
 const card: CSSProperties = { background: "#fff", border: "1px solid #e5e9f0", borderRadius: 16, padding: 18, boxShadow: "0 10px 28px #17243a08" };
 const button: CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, border: "1px solid #d9deea", borderRadius: 10, padding: "10px 13px", background: "#fff", color: "#24334b", fontWeight: 800, cursor: "pointer" };
@@ -18,6 +19,7 @@ function prettyReason(s: string) { return s === "payment_captured_after_hold_exp
 export default function OperationsMonitorPage() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [cases, setCases] = useState<RecentCase[]>([]);
+  const [cronRuns, setCronRuns] = useState<CronRun[]>([]);
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [message, setMessage] = useState("");
@@ -29,7 +31,7 @@ export default function OperationsMonitorPage() {
       const data = await response.json();
       if (response.status === 401) { setAuthenticated(false); setMessage("Please sign in to staff tools before viewing operations metrics."); setMetrics(null); return; }
       if (!response.ok || !data.ok) { setMessage("Monitoring data is unavailable. Check the database schema and server logs."); return; }
-      setAuthenticated(true); setMetrics(data.metrics); setCases(data.recentCases || []); setGeneratedAt(data.generatedAt);
+      setAuthenticated(true); setMetrics(data.metrics); setCases(data.recentCases || []); setCronRuns(data.cronRuns || []); setGeneratedAt(data.generatedAt);
     } catch { setMessage("Network error. Please retry."); }
     finally { setLoading(false); }
   }, []);
@@ -63,6 +65,22 @@ export default function OperationsMonitorPage() {
         </article>)}
       </div>}
       {generatedAt && <p style={{ color: "#8993a3", fontSize: 11, marginTop: 12 }}>Data generated: {new Date(generatedAt).toLocaleString("en-IN")}</p>}
+      {metrics && <section style={{ ...card, marginTop: 18 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 8 }}>
+          <h2 style={{ fontSize: 18, margin: 0 }}>Scheduled cleanup health</h2>
+          <span style={{ fontSize: 11, color: "#788397" }}>Last 8 recorded runs</span>
+        </div>
+        <p style={{ color: "#788397", fontSize: 12, lineHeight: 1.6 }}>Tracks calls to the expired-hold cleanup endpoint. No records means the job has not yet logged a run, or run logging is not configured.</p>
+        {cronRuns.length === 0 ? <div style={{ border: "1px dashed #d9deea", borderRadius: 10, padding: 14, color: "#788397", fontSize: 13 }}>No cleanup runs recorded yet. Check that the scheduler calls the protected endpoint.</div> : <div style={{ display: "grid", gap: 9 }}>
+          {cronRuns.map(run => <div key={run.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, border: "1px solid #edf0f5", borderRadius: 11, padding: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+              {run.status === "succeeded" ? <CheckCircle2 size={18} color="#16845b"/> : <AlertTriangle size={18} color={run.status === "failed" ? "#b42332" : "#b7791f"}/>}
+              <div><div style={{ fontSize: 13, fontWeight: 850 }}>{run.status === "succeeded" ? "Succeeded" : run.status === "failed" ? "Failed" : "Still running"}</div><div style={{ fontSize: 11, color: "#788397", marginTop: 3 }}>{new Date(run.started_at).toLocaleString("en-IN")}</div></div>
+            </div>
+            <div style={{ textAlign: "right", fontSize: 12, color: "#59677b" }}>{typeof run.released_seats === "number" ? `${run.released_seats} seats released` : "No result"}{run.error_code ? <div style={{ color: "#b42332", fontSize: 11 }}>Error: {run.error_code}</div> : null}</div>
+          </div>)}
+        </div>}
+      </section>}
       {metrics && <section style={{ ...card, marginTop: 18 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
           <h2 style={{ fontSize: 18, margin: 0 }}>Recent reconciliation cases</h2>
