@@ -32,7 +32,7 @@ Subscribe to the `payment.captured` event. Copy the webhook signing secret into 
 
 ## Important reconciliation rule
 
-If payment is captured after the seat hold has expired, or the held-seat inventory is inconsistent, the payment is recorded as succeeded but the booking is not auto-confirmed. The server logs a manual-reconciliation warning. Refund automation is not implemented; review and resolve such cases through the Razorpay dashboard before production.
+If payment is captured after the seat hold has expired, or the held-seat inventory is inconsistent, the payment is recorded as succeeded but the booking is not auto-confirmed. The webhook writes an idempotent case to the server-only payment_reconciliation_cases table. Duplicate captured-event retries are checked against persisted payment and booking state; a matching already-recorded payment is acknowledged without pretending the booking was confirmed.\n\nStaff can review cases at /admin/reconciliation after signing in at /admin/verification. The queue records the reason, booking reference, payment ID, amount and status. Marking a case resolved or refunded is an operational note only: it does not issue a refund or confirm the booking. Verify the payment in Razorpay and follow the operator's refund/rebooking procedure. Refund automation is not implemented.
 
 ## Before production
 
