@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CSSProperties, FormEvent, InputHTMLAttributes } from "react";
 import { ArrowRight, BusFront, CheckCircle2, CircleAlert, KeyRound, Route, ShieldCheck, Ticket } from "lucide-react";
 
-type ApiResult = { ok?: boolean; error?: string; operator?: { id: string; name: string }; route?: { id: string; origin_city: string; destination_city: string }; trip?: { id: string; bus_label: string; departure_at: string }; seatsCreated?: number };
+type ApiResult = { ok?: boolean; error?: string; operator?: { id: string; name: string }; route?: { id: string; origin_city: string; destination_city: string }; stop?: { id: string; stop_name: string; stop_type: string }; trip?: { id: string; bus_label: string; departure_at: string }; seatsCreated?: number };
 const inputStyle: CSSProperties = { width: "100%", minWidth: 0, border: "1px solid #dce3ec", borderRadius: 10, padding: "12px 13px", background: "#fff", color: "#16263b", outlineOffset: 2 };
 const labelStyle: CSSProperties = { display: "grid", gap: 7, fontSize: 12, fontWeight: 700, color: "#536277" };
 const buttonStyle: CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, border: 0, borderRadius: 10, padding: "12px 16px", background: "#f15a24", color: "#fff", fontWeight: 800, cursor: "pointer" };
@@ -21,6 +21,12 @@ export default function InventoryAdminPage() {
   const [destinationStop, setDestinationStop] = useState("");
   const [distanceKm, setDistanceKm] = useState("350");
   const [routeId, setRouteId] = useState("");
+  const [stopType, setStopType] = useState<"boarding" | "dropping">("boarding");
+  const [stopName, setStopName] = useState("");
+  const [stopAddress, setStopAddress] = useState("");
+  const [stopLandmark, setStopLandmark] = useState("");
+  const [reportingMinutes, setReportingMinutes] = useState("15");
+  const [stopOrder, setStopOrder] = useState("1");
   const [busLabel, setBusLabel] = useState("");
   const [busType, setBusType] = useState("AC Sleeper");
   const [departureAt, setDepartureAt] = useState("");
@@ -31,7 +37,7 @@ export default function InventoryAdminPage() {
   const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
   const [lastResult, setLastResult] = useState<ApiResult | null>(null);
 
-  async function submit(action: "create_operator" | "create_route" | "create_trip", data: Record<string, unknown>) {
+  async function submit(action: "create_operator" | "create_route" | "create_route_stop" | "create_trip", data: Record<string, unknown>) {
     if (!token.trim()) { setMessage({ kind: "error", text: "Enter the server-configured admin token first. It is held only in this page's current memory." }); return null; }
     setBusy(action); setMessage(null); setLastResult(null);
     try {
@@ -46,13 +52,15 @@ export default function InventoryAdminPage() {
           active_route_not_found: "Create the route first, then use its ID.",
           invalid_trip_or_seat_labels: "Check future departure, arrival, fare and unique seat labels.",
           invalid_route: "Check that the cities differ and distance is positive.",
+          invalid_route_stop: "Check the route ID, stop name, stop type, reporting time and order.",
+          route_stop_write_failed: "Could not save the route stop. Check the database migration and route ID.",
         };
         setMessage({ kind: "error", text: friendly[payload.error ?? ""] ?? `Request failed: ${payload.error ?? response.status}` }); return null;
       }
       setLastResult(payload);
       if (action === "create_operator" && payload.operator) setOperatorId(payload.operator.id);
       if (action === "create_route" && payload.route) setRouteId(payload.route.id);
-      setMessage({ kind: "success", text: action === "create_operator" ? "Operator created. Its ID is ready for the route form." : action === "create_route" ? "Route created. Its ID is ready for the trip form." : `Trip created with ${payload.seatsCreated ?? 0} seats.` });
+      setMessage({ kind: "success", text: action === "create_operator" ? "Operator created. Its ID is ready for the route form." : action === "create_route" ? "Route created. Its ID is ready for the trip form and stop manager." : action === "create_route_stop" ? "Route stop saved. Add more stops with distinct order numbers." : `Trip created with ${payload.seatsCreated ?? 0} seats.` });
       return payload;
     } catch {
       setMessage({ kind: "error", text: "Could not reach the inventory API. Confirm deployment and try again." }); return null;
@@ -79,6 +87,10 @@ export default function InventoryAdminPage() {
   }
   function onRoute(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); void submit("create_route", { operatorId, originCity, destinationCity, originStop, destinationStop, distanceKm: distanceKm || null });
+  }
+  function onStop(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void submit("create_route_stop", { routeId, stopType, stopName, address: stopAddress, landmark: stopLandmark, reportingMinutes: Number(reportingMinutes), sortOrder: Number(stopOrder) });
   }
   function onTrip(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -110,7 +122,12 @@ export default function InventoryAdminPage() {
           {routeId && <p style={{ fontSize: 12, overflowWrap: "anywhere", color: "#17663a", marginBottom: 0 }}>Route ID: <code>{routeId}</code></p>}
         </section>
         <section style={{ background: "#fff", border: "1px solid #e4e9ef", borderRadius: 16, padding: 20 }}>
-          <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 18 }}><span style={{ width: 42, height: 42, borderRadius: 12, background: "#fff1e9", color: "#f15a24", display: "grid", placeItems: "center" }}><Ticket /></span><div><div style={{ color: "#f15a24", fontSize: 10, fontWeight: 900, letterSpacing: 1.5 }}>STEP 03</div><h2 style={{ margin: "4px 0 0", fontSize: 20, color: "#10243d" }}>Create trip + seats</h2></div></div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 18 }}><span style={{ width: 42, height: 42, borderRadius: 12, background: "#f0eaff", color: "#6b35d5", display: "grid", placeItems: "center" }}><Route /></span><div><div style={{ color: "#6b35d5", fontSize: 10, fontWeight: 900, letterSpacing: 1.5 }}>STEP 03</div><h2 style={{ margin: "4px 0 0", fontSize: 20, color: "#10243d" }}>Add boarding / dropping stops</h2></div></div>
+          <p style={{ color: "#738095", fontSize: 12, lineHeight: 1.6 }}>Use the route ID created in Step 02. Add every permitted stop; once a route has configured stops, booking validation uses those active stop names.</p>
+          <form onSubmit={onStop} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>{idField("Route ID", routeId, setRouteId)}<label style={labelStyle}>Stop type<select style={inputStyle} value={stopType} onChange={(e) => { const value = e.target.value as "boarding" | "dropping"; setStopType(value); setReportingMinutes(value === "boarding" ? "15" : "0"); }}><option value="boarding">Boarding / pickup</option><option value="dropping">Dropping / destination</option></select></label>{field("Stop name", stopName, setStopName, { required: true, minLength: 2, placeholder: "e.g. Koyambedu Bus Stand" })}{field("Address (optional)", stopAddress, setStopAddress, { placeholder: "Street, area" })}{field("Landmark (optional)", stopLandmark, setStopLandmark, { placeholder: "Near metro entrance" })}{field("Report early (minutes)", reportingMinutes, setReportingMinutes, { type: "number", min: "0", max: "180", step: "1", required: true })}{field("Display order", stopOrder, setStopOrder, { type: "number", min: "0", step: "1", required: true })}<div style={{ display: "flex", alignItems: "end" }}><button style={buttonStyle} type="submit" disabled={!!busy}>{busy === "create_route_stop" ? "Saving stop…" : "Save route stop"} <ArrowRight size={16} /></button></div></form>
+        </section>
+        <section style={{ background: "#fff", border: "1px solid #e4e9ef", borderRadius: 16, padding: 20 }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 18 }}><span style={{ width: 42, height: 42, borderRadius: 12, background: "#fff1e9", color: "#f15a24", display: "grid", placeItems: "center" }}><Ticket /></span><div><div style={{ color: "#f15a24", fontSize: 10, fontWeight: 900, letterSpacing: 1.5 }}>STEP 04</div><h2 style={{ margin: "4px 0 0", fontSize: 20, color: "#10243d" }}>Create trip + seats</h2></div></div>
           <form onSubmit={onTrip} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>{idField("Active route ID", routeId, setRouteId)}{field("Bus / service label", busLabel, setBusLabel, { required: true, minLength: 2, placeholder: "HB Chennai Express" })}{field("Bus type", busType, setBusType, { required: true, placeholder: "AC Sleeper" })}{field("Departure (your local time)", departureAt, setDepartureAt, { type: "datetime-local", required: true })}{field("Arrival (your local time)", arrivalAt, setArrivalAt, { type: "datetime-local", required: true })}{field("Fare per seat (₹)", fareRupees, setFareRupees, { type: "number", min: "0", max: "100000", step: "0.01", required: true })}{field("Seat labels, comma-separated", seatLabels, setSeatLabels, { required: true, placeholder: "A1, A2, B1, B2" })}<div style={{ display: "flex", alignItems: "end" }}><button style={buttonStyle} type="submit" disabled={!!busy}>{busy === "create_trip" ? "Creating…" : "Create trip and seats"} <ArrowRight size={16} /></button></div></form>
           <p style={{ color: "#738095", fontSize: 12, lineHeight: 1.6, marginBottom: 0 }}>Use future dates, distinct seat labels, and verify the fare and schedule before creating live inventory.</p>
         </section>
