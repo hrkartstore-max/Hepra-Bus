@@ -1,6 +1,6 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "../../../../../lib/supabase-admin";
+import { verifyStaffSession } from "../../../../../lib/staff-session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,17 +12,8 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function authorized(request: NextRequest) {
-  const expected = process.env.HEPRABUS_ADMIN_TOKEN;
-  const supplied = request.headers.get("x-heprabus-admin-token") ?? "";
-  if (!expected || !supplied) return false;
-  const a = createHash("sha256").update(expected).digest();
-  const b = createHash("sha256").update(supplied).digest();
-  return timingSafeEqual(a, b) && expected.length === supplied.length;
-}
-
 export async function POST(request: NextRequest) {
-  if (!authorized(request)) return json({ ok: false, error: "unauthorized" }, 401);
+  if (!verifyStaffSession(request)) return json({ ok: false, error: "unauthorized" }, 401);
   let body: unknown;
   try { body = await request.json(); } catch { return json({ ok: false, error: "invalid_json" }, 400); }
   const reference = body && typeof body === "object" && "reference" in body && typeof body.reference === "string"
