@@ -938,3 +938,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
  #my-trips .ticket-trip-meta b,#my-trips .trip-lookup-grid>span>b{color:#111!important}
  .site-header,.site-footer,.announcement,.hero,.booking-shell,.results-section,.seat-section,.trust-strip,.routes-section,.offer-section,.help-section{display:none!important}
 }
+
+
+/* V6 booking lookup interaction states */
+.trip-lookup-form .search-button:disabled{opacity:.72;cursor:wait;transform:none;box-shadow:none}
+.lookup-spinner{width:15px;height:15px;display:inline-block;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:hepra-lookup-spin .7s linear infinite;flex:0 0 auto}
+@keyframes hepra-lookup-spin{to{transform:rotate(360deg)}}
+.trip-lookup-form input:focus-visible{outline:3px solid #6b35d52e;outline-offset:2px}
+#my-trips .form-error{display:flex;align-items:flex-start;gap:9px;padding:13px 15px;border:1px solid #f5cbd0;border-radius:12px;background:#fff4f5;color:#9f2636;font-size:12px;line-height:1.6}
+#my-trips .form-error:before{content:"!";display:grid;place-items:center;width:19px;height:19px;flex:0 0 auto;border-radius:50%;background:#f9dce0;color:#9f2636;font-weight:900}
+@media(prefers-reduced-motion:reduce){.lookup-spinner{animation:none;border-right-color:currentColor}}
