@@ -432,3 +432,38 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .live-seat-map-grid button.available:hover{transform:translateY(-2px);box-shadow:0 5px 12px #17663e16}
 .live-seat-map-grid button:disabled{cursor:not-allowed}
 @media(max-width:760px){.live-bus-front{padding:9px 11px}.live-seat-list.live-seat-map-grid{gap:8px;padding:11px}.live-seat-map-grid button{min-height:59px;font-size:11px}.live-seat-map-grid button small{font-size:8px}}
+
+
+/* Print-friendly passenger ticket */
+.ticket-card{padding:22px;border:1px solid #e1d8f2;border-radius:18px;background:#fff;box-shadow:0 12px 35px #29213d0b}
+.ticket-brand-print{display:flex;flex-direction:column;gap:3px}
+.ticket-brand-print strong{font-size:22px;letter-spacing:-1px;color:#202124}
+.ticket-brand-print strong span{color:var(--hepra-red)}
+.ticket-brand-print small{font-size:8px;letter-spacing:1px;color:#737786;font-weight:800}
+.ticket-print-button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 13px;border:1px solid #ded6ef;border-radius:10px;background:#fff;color:#5b2bb4;font-size:11px;font-weight:800}
+.ticket-title-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 0 14px;border-bottom:1px dashed #dcd7e8}
+.ticket-title-row h3{font-size:20px;letter-spacing:.3px;margin:6px 0 0;color:#202124}
+.ticket-route-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0;padding:18px;border-radius:13px;background:linear-gradient(110deg,#f7f3ff,#fff2f3);border:1px solid #eee5fa}
+.ticket-route-banner>div{display:grid;gap:7px;min-width:0}
+.ticket-route-banner small{font-size:8px;letter-spacing:1.2px;color:#737786;font-weight:900}
+.ticket-route-banner strong{font-size:17px;overflow-wrap:anywhere;color:#202124}
+.ticket-route-banner>svg{flex-shrink:0;color:var(--hepra-violet)}
+.ticket-trip-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 0 17px;border-bottom:1px solid #ece9f3}
+.ticket-trip-meta span{font-size:8px;letter-spacing:.8px;color:#858596;font-weight:900}
+.ticket-trip-meta b{display:block;margin-top:7px;font-size:11px;line-height:1.5;letter-spacing:0;color:#202124;overflow-wrap:anywhere}
+.ticket-details-heading{margin-top:17px}
+.ticket-card .trip-lookup-grid{margin-top:12px}
+@media(max-width:600px){.ticket-card{padding:15px}.ticket-route-banner{padding:13px}.ticket-route-banner strong{font-size:14px}.ticket-trip-meta{grid-template-columns:1fr;gap:10px}.ticket-trip-meta b{margin-top:4px}}
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  body *{visibility:hidden!important}
+  .my-trips-section,.my-trips-section *{visibility:visible!important}
+  .my-trips-section{position:absolute!important;left:0!important;top:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;background:#fff!important}
+  .my-trips-heading,.trip-lookup-form,.my-trips-section>.form-error,.ticket-print-button,.ticket-card>p,.ticket-card>.secondary-ticket-button{display:none!important}
+  .ticket-card{position:static!important;display:block!important;width:100%!important;box-shadow:none!important;border:1px solid #cfcfcf!important;border-radius:8px!important;padding:18px!important;background:#fff!important;color:#111!important;break-inside:avoid}
+  .ticket-brand-print strong,.ticket-title-row h3,.ticket-route-banner strong,.ticket-trip-meta b,.trip-lookup-grid b{color:#111!important}
+  .ticket-route-banner{background:#f7f7f7!important;border-color:#ddd!important}
+  .trip-lookup-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .trip-lookup-grid>span{break-inside:avoid}
+}
