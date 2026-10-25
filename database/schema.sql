@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   booking_reference TEXT NOT NULL UNIQUE DEFAULT ('HB-' || upper(substr(encode(gen_random_bytes(8), 'hex'), 1, 12))),
   trip_id UUID NOT NULL REFERENCES trips(id) ON DELETE RESTRICT,
+  boarding_point TEXT,
+  dropping_point TEXT,
   contact_name TEXT NOT NULL,
   contact_phone TEXT NOT NULL,
   contact_email TEXT,
