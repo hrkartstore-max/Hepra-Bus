@@ -789,3 +789,49 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
  .live-seat-map-grid .seat{min-height:70px;border-radius:10px}
  .live-bus-front{padding:10px 12px}
 }
+
+
+/* V4 passenger checkout and fare-summary UX */
+#live-seat-selection .seat-section-head{padding:0 0 16px;border-bottom:1px solid #eeeaf5;margin-bottom:18px}
+#live-seat-selection .seat-section-head h2{font-size:clamp(26px,3.4vw,36px);letter-spacing:-1.4px;margin:8px 0}
+#live-seat-selection .seat-section-head p{color:#777284;font-size:13px;line-height:1.6}
+#live-seat-selection .seat-layout{align-items:start;gap:18px}
+#live-seat-selection .seat-map-card,#live-seat-selection .passenger-card{background:#fff}
+#live-seat-selection .seat-map-card{position:relative;overflow:hidden}
+#live-seat-selection .seat-map-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:15px;border-bottom:1px solid #f0edf5;margin-bottom:15px}
+#live-seat-selection .seat-map-top b{font-size:17px;letter-spacing:-.3px}
+#live-seat-selection .seat-map-top small{display:block;color:#898394;font-size:11px;margin-top:5px}
+#live-seat-selection .passenger-card{display:flex;flex-direction:column;gap:12px}
+#live-seat-selection .passenger-card h3{font-size:25px;margin:0}
+#live-seat-selection .passenger-card .form-field{margin:0}
+#live-seat-selection .live-fare-breakdown{position:relative;margin-top:3px;padding:16px;background:#faf8ff;border:1px solid #e8e0f6;border-radius:15px}
+#live-seat-selection .live-fare-breakdown .live-fare-title{display:flex;justify-content:space-between;gap:12px;font-size:11px;font-weight:900;letter-spacing:.65px}
+#live-seat-selection .live-fare-breakdown>div:not(.live-fare-title):not(.live-fare-total){display:flex;justify-content:space-between;gap:14px;padding-top:11px;font-size:12px;color:#6d6879}
+#live-seat-selection .live-fare-breakdown>div b{color:#373142;font-size:12px}
+#live-seat-selection .live-fare-breakdown .live-fare-total{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;padding-top:13px;border-top:1px dashed #dcd1f0}
+#live-seat-selection .live-fare-breakdown .live-fare-total span{font-size:13px;font-weight:850;color:#332b40}
+#live-seat-selection .live-fare-breakdown .live-fare-total strong{font-size:25px;letter-spacing:-.7px;color:#d93645}
+#live-seat-selection .live-fare-breakdown p{font-size:10px;line-height:1.5;color:#898394;margin:10px 0 0}
+#live-seat-selection .live-hold-cta{width:100%;min-height:54px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;letter-spacing:.05px}
+#live-seat-selection .live-hold-cta:disabled{opacity:.55;box-shadow:none;transform:none;cursor:not-allowed}
+#live-seat-selection .demo-disclaimer{display:flex;align-items:flex-start;gap:7px;font-size:10px;line-height:1.55;margin:0;color:#7d778b}
+#live-seat-selection .demo-disclaimer svg{flex:0 0 auto;margin-top:1px;color:#6b35d5}
+#live-seat-selection .form-error{border-radius:10px;padding:10px 12px;background:#fff0f1;border:1px solid #ffd9dd;color:#a12436;font-size:12px}
+@media(min-width:900px){
+ #live-seat-selection .seat-layout{grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr)}
+ #live-seat-selection .passenger-card{position:sticky;top:100px}
+}
+@media(max-width:640px){
+ #live-seat-selection .seat-section-head{align-items:flex-start}
+ #live-seat-selection .seat-section-head h2{font-size:25px}
+ #live-seat-selection .seat-layout{gap:12px}
+ #live-seat-selection .passenger-card{padding:17px 14px;gap:11px}
+ #live-seat-selection .passenger-card h3{font-size:23px}
+ #live-seat-selection .live-fare-breakdown{padding:14px}
+ #live-seat-selection .live-fare-breakdown .live-fare-total strong{font-size:23px}
+ #live-seat-selection .live-hold-cta{position:sticky;bottom:10px;z-index:5;box-shadow:0 8px 28px #d9364550;border:4px solid #fff;min-height:55px}
+ #live-seat-selection .demo-disclaimer{padding-bottom:3px}
+}
+@media print{
+ .live-hold-cta,.text-button,.secondary-ticket-button{display:none!important}
+}
