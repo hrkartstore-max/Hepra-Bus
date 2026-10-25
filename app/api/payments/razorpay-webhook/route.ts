@@ -67,11 +67,45 @@ export async function POST(request: NextRequest) {
       p_currency: payment.currency,
     });
     if (confirmError) {
+      // A duplicate captured event may arrive after the payment was recorded but the booking
+      // could not be confirmed. Read back persisted state to acknowledge that retry safely.
+      const { data: currentPayment, error: currentPaymentError } = await supabase
+        .from("payments").select("id,status,provider_payment_id").eq("id", record.id).maybeSingle();
+      const { data: currentBooking, error: currentBookingError } = await supabase
+        .from("bookings").select("status").eq("id", record.booking_id).maybeSingle();
+      if (!currentPaymentError && !currentBookingError && currentPayment?.status === "succeeded" &&
+          currentPayment.provider_payment_id === payment.id && currentBooking && currentBooking.status !== "confirmed") {
+        const reason = currentBooking.status === "expired" ? "payment_captured_after_hold_expired" : "duplicate_capture_conflict";
+        const { error: caseError } = await supabase.from("payment_reconciliation_cases").upsert({
+          booking_id: record.booking_id, payment_id: record.id, provider_payment_id: payment.id, reason,
+          details: { bookingStatus: currentBooking.status, source: "duplicate_webhook_retry" },
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "payment_id,reason", ignoreDuplicates: true });
+        if (caseError) {
+          console.error("Could not persist duplicate payment reconciliation case", { code: caseError.code, orderId: payment.order_id });
+          return json({ ok: false, error: "payment_reconciliation_failed" }, 503);
+        }
+        console.warn("Duplicate captured payment acknowledged; booking still needs reconciliation", {
+          bookingReference: booking.booking_reference, orderId: payment.order_id, reason,
+        });
+        return json({ ok: true, idempotent: true, manual_reconciliation_required: true, reason });
+      }
       console.error("Razorpay payment reconciliation failed", { code: confirmError.code, orderId: payment.order_id });
       return json({ ok: false, error: "payment_reconciliation_failed" }, 503);
     }
     if (result?.manual_reconciliation_required) {
-      console.error("Captured payment needs manual reconciliation", { bookingReference: booking.booking_reference, reason: result.reason });
+      const reason = result.reason === "payment_captured_after_hold_expired" || result.reason === "seat_hold_inconsistent"
+        ? result.reason : "duplicate_capture_conflict";
+      const { error: caseError } = await supabase.from("payment_reconciliation_cases").upsert({
+        booking_id: record.booking_id, payment_id: record.id, provider_payment_id: payment.id, reason,
+        details: { bookingStatus: result.status ?? null, source: "payment_captured_webhook" },
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "payment_id,reason", ignoreDuplicates: true });
+      if (caseError) {
+        console.error("Could not persist payment reconciliation case", { code: caseError.code, orderId: payment.order_id });
+        return json({ ok: false, error: "payment_reconciliation_failed" }, 503);
+      }
+      console.error("Captured payment needs manual reconciliation", { bookingReference: booking.booking_reference, reason });
     }
     return json({ ok: true, result });
   } catch {
