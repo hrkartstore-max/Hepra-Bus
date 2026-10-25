@@ -11,6 +11,8 @@ type RequestBody = {
   phone?: unknown;
   email?: unknown;
   passengers?: unknown;
+  boardingPoint?: unknown;
+  droppingPoint?: unknown;
 };
 
 const json = (body: unknown, status = 200) =>
@@ -69,6 +71,10 @@ export async function POST(request: NextRequest) {
   if (email && (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
     return json({ ok: false, error: "invalid_email" }, 400);
   }
+  const boardingPoint = cleanText(body.boardingPoint, 160);
+  const droppingPoint = cleanText(body.droppingPoint, 160);
+  if (!boardingPoint || !droppingPoint) return json({ ok: false, error: "invalid_stops", message: "Choose boarding and dropping points." }, 400);
+
   if (!Array.isArray(body.passengers) || body.passengers.length < 1 || body.passengers.length > 6) {
     return json({ ok: false, error: "invalid_passengers", message: "Choose 1 to 6 passengers." }, 400);
   }
@@ -103,6 +109,8 @@ export async function POST(request: NextRequest) {
         passenger_name: p.passengerName,
       })),
       p_hold_minutes: 10,
+      p_boarding_point: boardingPoint,
+      p_dropping_point: droppingPoint,
     });
 
     if (error) {
