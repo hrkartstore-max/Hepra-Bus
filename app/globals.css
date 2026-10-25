@@ -496,3 +496,206 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .verify-home{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:10px;background:var(--hepra-red);color:#fff;font-size:11px;font-weight:900}
 @media(max-width:600px){.verify-page{padding:20px 12px 32px}.verify-card{padding:20px;border-radius:18px}.verify-route{padding:13px}.verify-route strong{font-size:14px}.ticket-qr-row{align-items:flex-start}.ticket-qr{width:88px;height:88px}.ticket-qr-row small{font-size:9px}}
 @media print{.ticket-qr-row{break-inside:avoid}.ticket-qr{print-color-adjust:exact}}
+
+
+/* HEPRA BUS frontend refresh — polished red/violet travel UI */
+:root{
+  --orange:#d93645;--orange-dark:#b92536;--navy:#202124;--navy-2:#30323a;
+  --ink:#202124;--muted:#737783;--line:#e7e7ee;--paper:#f5f5fa;--cream:#fff2f3;
+  --radius:20px;--hepra-violet:#6b35d5;--hepra-violet-soft:#f1ebff;
+}
+body{font-family:Inter,Manrope,"Segoe UI",Arial,Helvetica,sans-serif;background:#fff;color:#202124}
+::selection{background:#e8dcff;color:#241344}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #9b7ae8;outline-offset:3px}
+.announcement{height:35px;background:#241b3d;font-size:11px;letter-spacing:.25px}
+.site-header{position:sticky;top:0;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);box-shadow:0 4px 24px #24203a08;border-bottom-color:#eeedf3}
+.nav-wrap{height:76px;max-width:1280px}
+.brand-mark{background:linear-gradient(140deg,#e84a56,#c92239);border-radius:15px;box-shadow:0 8px 20px #d9364530}
+.brand-copy strong{color:#202124;font-size:27px;letter-spacing:-1.35px}
+.brand-copy strong span{color:#d93645}
+.main-nav{gap:27px}
+.main-nav a{font-size:13px;color:#575b66}
+.main-nav a:hover,.main-nav a.active{color:#d93645}
+.main-nav a.active:after{background:#d93645;height:3px}
+.my-trips{border-radius:12px;border-color:#e5e3ec;padding:12px 16px;font-size:13px}
+.my-trips svg{color:#6b35d5}
+.my-trips:hover{background:#f7f3ff;border-color:#d7c8fa}
+.hero{background:radial-gradient(ellipse at 82% 18%,#56348a 0%,transparent 33%),linear-gradient(120deg,#1c1730 0%,#29203f 54%,#3b254e 100%)}
+.hero-inner{max-width:1280px;min-height:450px;padding:72px 32px 56px;grid-template-columns:1.02fr .98fr;gap:28px}
+.eyebrow,.section-overline{letter-spacing:1.45px}
+.eyebrow.light{color:#d6c2ff}
+.eyebrow-dot{background:#ff6570;box-shadow:0 0 0 5px #ff657020}
+.hero h1{font-size:clamp(44px,5.4vw,70px);line-height:1.01;letter-spacing:-3.6px}
+.hero h1 em{color:#ff6874}
+.hero-copy>p{font-size:15px;max-width:460px;color:#d5d1df}
+.hero-points{gap:18px}
+.hero-points span{font-size:12px;color:#f5f2fb}
+.hero-points svg{color:#c5a9ff}
+.sun-disc{background:linear-gradient(135deg,#ffb1a8,#e34a60);box-shadow:0 0 70px #d9364533}
+.road-back{background:#45315e}
+.road-front{background:#171326;border-top-color:#6b527f}
+.illustration-bus{background:linear-gradient(145deg,#f05a67,#c92b42);border-bottom-color:#9f1f35;box-shadow:0 28px 40px #09061766}
+.illustration-bus:before{content:"HEPRA BUS";letter-spacing:1.4px}
+.hero-bottom{background:#fff;border-bottom:1px solid #eeeaf4}
+.hero-bottom-inner{max-width:1280px}
+.hero-bottom-line{color:#6d7180}
+.hero-bottom-line svg{color:#6b35d5}
+.booking-shell{max-width:1180px;margin:-38px auto 0;position:relative;z-index:4;border:1px solid #ebe7f2;border-radius:24px;padding:27px 28px 22px;background:#fff;box-shadow:0 22px 65px #21153b16}
+.booking-heading h2{letter-spacing:-1.2px}
+.booking-fields{gap:10px}
+.field,.passenger-field{border:1px solid #e8e6ee;background:#fbfbfd;border-radius:14px;min-height:76px}
+.field:focus-within,.form-field:focus-within{border-color:#9c7ce8;box-shadow:0 0 0 4px #6b35d510}
+.field>span,.form-field>span,.trip-lookup-form label>span{color:#747585;letter-spacing:.85px}
+.field-control{color:#24232c}
+.field-control input,.field-control select{font-weight:750}
+.swap-button{border-color:#e3d8fb;background:#f5f0ff;color:#6b35d5}
+.swap-button:hover{background:#e9ddff;transform:rotate(180deg)}
+.search-button{background:linear-gradient(135deg,#e24654,#c92d43);border:0;border-radius:13px;box-shadow:0 9px 20px #d9364526;font-weight:850;min-height:48px}
+.search-button:hover{background:linear-gradient(135deg,#d93645,#ad2035);transform:translateY(-1px);box-shadow:0 12px 24px #d9364533}
+.booking-foot{color:#767887}
+.results-section,.seat-section,.my-trips-section,.routes-section{max-width:1180px}
+.results-heading h2,.seat-section-head h2,.my-trips-heading h2,.section-heading h2{letter-spacing:-1.4px}
+.section-overline{color:#6b35d5}
+.result-card{border:1px solid #e9e7ef;border-radius:18px;box-shadow:0 8px 24px #1c17300a;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.result-card:hover{border-color:#d5c6f5;box-shadow:0 16px 36px #28164b12;transform:translateY(-2px)}
+.live-dot{background:#17a673;box-shadow:0 0 0 4px #17a67317}
+.demo-pill{border-radius:999px;background:#f1ebff;color:#5b2cb5}
+.choose-seats-button{background:#6b35d5;border-radius:11px;font-weight:850}
+.choose-seats-button:hover{background:#5125b5}
+.live-filter-bar{border:1px solid #e9e6f0;border-radius:16px;background:#fbfaff}
+.seat-section{margin-top:46px}
+.seat-map-card,.passenger-card,.my-trips-section,.trip-lookup-result,.confirmation-card{border:1px solid #e8e5ef;border-radius:22px;box-shadow:0 12px 38px #20143b0b}
+.seat-map-card,.passenger-card{padding:24px}
+.seat{border-radius:9px;border-color:#ded9eb}
+.seat.available:hover{border-color:#6b35d5;background:#f3edff}
+.seat.selected{background:#6b35d5;border-color:#6b35d5;box-shadow:0 5px 12px #6b35d533}
+.seat.occupied{background:#e8e8ed;color:#9b9ba5}
+.form-field{border:1px solid #e6e4ec;border-radius:12px;background:#fff}
+.form-field>div{min-height:46px}
+.form-field input,.form-field select{color:#26232f}
+.form-field input::placeholder{color:#a0a0ad}
+.live-fare-breakdown,.fare-summary{background:#f8f6fc;border:1px solid #eee8f8;border-radius:15px;padding:16px}
+.live-fare-total strong,.fare-summary>div strong{color:#d93645}
+.live-hold-cta{width:100%}
+.demo-disclaimer{color:#767585}
+.confirmation-icon{background:#eee7ff;color:#6b35d5}
+.secondary-ticket-button,.text-button{border:1px solid #ded6f0;border-radius:11px;color:#5b2cb5;background:#fff}
+.secondary-ticket-button:hover,.text-button:hover{background:#f7f2ff;border-color:#cbb9f1}
+.my-trips-section{background:linear-gradient(145deg,#fff 0%,#fbf9ff 100%);padding:32px;margin-top:42px}
+.trip-lookup-form label input{border:1px solid #e5e2ed;border-radius:12px;background:#fff}
+.trip-lookup-form label input:focus{border-color:#9c7ce8;outline:0;box-shadow:0 0 0 4px #6b35d512}
+.ticket-brand-print strong{color:#202124}
+.ticket-brand-print strong span{color:#d93645}
+.ticket-route-banner{background:#f5f0ff;border:1px solid #ebe2ff;border-radius:15px}
+.status-pill-confirmed{background:#e6f8ef;color:#08784e}
+.status-pill-pending{background:#fff3dc;color:#93610a}
+.status-pill-expired,.status-pill-cancelled,.status-pill-failed{background:#ffe9eb;color:#a32636}
+.trust-strip{max-width:1180px;margin:38px auto;padding:23px;border:1px solid #ece9f2;border-radius:20px;background:#fff}
+.trust-item>span{background:#f1ebff;color:#6b35d5;border-radius:13px}
+.trust-item b{color:#292632}
+.trust-item small{color:#777584}
+.routes-section{padding-top:42px;padding-bottom:60px}
+.route-grid{gap:18px}
+.route-card{border:1px solid #e9e6ef;border-radius:19px;overflow:hidden;box-shadow:0 8px 25px #21153b08}
+.route-card:hover{transform:translateY(-4px);border-color:#d6c5f4;box-shadow:0 18px 35px #21153b14}
+.route-art{min-height:130px;background:linear-gradient(130deg,#33244e,#6b35d5)}
+.route-art.city{background:linear-gradient(130deg,#29203f,#7752bb)}
+.route-art.hills{background:linear-gradient(130deg,#1d4b54,#438d83)}
+.route-art.temple{background:linear-gradient(130deg,#6d303d,#c15a63)}
+.route-art.green{background:linear-gradient(130deg,#285545,#77a68a)}
+.route-art-caption{letter-spacing:1.5px}
+.route-card-body{padding:17px}
+.route-meta strong{color:#d93645}
+.route-card-footer>span:first-child{background:#f1ebff;color:#5b2cb5;border-radius:999px;padding:5px 9px}
+.route-cta{color:#6b35d5;font-weight:850}
+.offer-section{border-radius:24px;overflow:hidden;background:radial-gradient(circle at 80% 18%,#6d4a99 0,transparent 34%),linear-gradient(120deg,#21172f,#39234d);max-width:1180px;margin:0 auto 52px}
+.offer-copy h2 em{color:#ff7580}
+.offer-code{border-color:#6e5a85;background:#ffffff0a;border-radius:14px}
+.offer-art{opacity:.94}
+.help-section{max-width:1180px;border:1px solid #e9e5f0;border-radius:20px;background:#fff}
+.help-icon{background:#f1ebff;color:#6b35d5;border-radius:14px}
+.help-section>a,.section-heading>a{color:#6b35d5;font-weight:850}
+.site-footer{background:#21192f;color:#fff}
+.footer-brand .brand-copy strong{color:#fff}
+.footer-brand .brand-copy strong span{color:#ff6874}
+.footer-bottom{border-top-color:#ffffff20;color:#bdb5ca}
+.footer-links a{color:#ddd5ea}
+.footer-links a:hover{color:#ff8790}
+@media(max-width:900px){
+ .nav-wrap{height:68px;padding:0 18px;gap:12px}
+ .main-nav{gap:16px}
+ .hero-inner{padding:54px 22px 46px;min-height:400px;gap:8px}
+ .hero h1{letter-spacing:-2.6px}
+ .booking-shell{margin:0 16px;padding:22px 18px;border-radius:0 0 20px 20px}
+ .results-section,.seat-section,.my-trips-section,.routes-section{margin-left:16px;margin-right:16px}
+ .trust-strip{margin-left:16px;margin-right:16px}
+ .offer-section,.help-section{margin-left:16px;margin-right:16px}
+}
+@media(max-width:640px){
+ .announcement{height:auto;min-height:32px;padding:7px 12px;text-align:center;font-size:9px;line-height:1.4}
+ .nav-wrap{height:62px;padding:0 14px}
+ .brand{gap:7px}.brand-mark{width:36px;height:36px;border-radius:12px}.brand-copy strong{font-size:23px}.brand-copy small{font-size:7px;letter-spacing:.8px}
+ .main-nav{display:none}
+ .nav-actions{gap:4px}.my-trips{padding:9px 10px;font-size:11px;border-radius:10px}.my-trips svg{width:15px}
+ .menu-toggle{display:flex}
+ .hero-inner{display:flex;flex-direction:column;align-items:stretch;min-height:0;padding:36px 18px 25px;gap:8px}
+ .hero-copy{padding:0}.eyebrow{font-size:9px;letter-spacing:1.1px}
+ .hero h1{font-size:clamp(39px,11vw,54px);line-height:1.01;letter-spacing:-2.3px;margin:17px 0 13px}
+ .hero-copy>p{font-size:13px;line-height:1.65}
+ .hero-points{margin-top:18px;gap:10px 15px}.hero-points span{font-size:10px}
+ .hero-visual{height:210px;margin:0 -8px;transform:scale(.91);transform-origin:center top}
+ .sun-disc{width:145px;height:145px;right:18%;top:0}
+ .illustration-bus{width:255px;height:116px;right:5%;top:55px;border-radius:20px 27px 13px 13px}
+ .illustration-bus:before{font-size:12px;bottom:15px;left:19px}
+ .bus-windows{left:15px;right:15px;top:12px;height:43px;gap:5px}.bus-windows i{border-width:2px;border-radius:7px 7px 2px 2px}
+ .bus-front{top:12px;width:25px;height:45px}
+ .bus-wheels{bottom:-16px;left:28px;right:26px}
+ .hero-bottom{overflow:hidden}.hero-bottom-inner{padding:12px 16px;gap:12px;justify-content:flex-start;overflow-x:auto}
+ .hero-bottom-line{white-space:nowrap;font-size:10px}
+ .booking-shell{margin:0;padding:23px 16px 18px;border-left:0;border-right:0;border-radius:0;box-shadow:0 12px 28px #21153b08}
+ .booking-heading h2{font-size:24px;letter-spacing:-.9px}
+ .booking-fields{display:grid;grid-template-columns:1fr;gap:9px}
+ .field,.passenger-field{min-height:64px;border-radius:12px}
+ .swap-button{justify-self:center;transform:rotate(90deg);margin:-3px 0}
+ .swap-button:hover{transform:rotate(270deg)}
+ .search-button{min-height:48px;border-radius:12px}
+ .booking-foot{font-size:10px;line-height:1.5}
+ .results-section,.seat-section,.my-trips-section,.routes-section{margin-left:14px;margin-right:14px}
+ .results-heading{align-items:flex-start;gap:10px}.results-heading h2,.seat-section-head h2,.my-trips-heading h2,.section-heading h2{font-size:25px;letter-spacing:-1px}
+ .live-filter-bar{padding:12px;overflow-x:auto}
+ .results-grid{grid-template-columns:1fr;gap:12px}
+ .result-card{padding:15px;border-radius:15px}
+ .live-result-route{gap:8px}
+ .live-time-block strong{font-size:18px}
+ .live-result-details{flex-wrap:wrap;gap:9px}
+ .seat-section-head{align-items:flex-start;gap:10px}
+ .seat-map-card,.passenger-card{padding:16px;border-radius:17px}
+ .seat-layout{grid-template-columns:1fr;gap:13px}
+ .passenger-card h3{font-size:22px}
+ .my-trips-section{padding:22px 16px;margin-top:30px;border-radius:18px}
+ .trip-lookup-form{grid-template-columns:1fr}
+ .trip-lookup-result{padding:16px}
+ .ticket-qr-row{align-items:center;gap:10px}
+ .ticket-qr{width:88px;height:88px}
+ .trip-lookup-grid{grid-template-columns:1fr 1fr;gap:12px}
+ .trust-strip{margin:24px 14px;padding:15px;grid-template-columns:1fr 1fr;gap:16px}
+ .trust-item{gap:9px}.trust-item>span{width:38px;height:38px;flex-shrink:0}.trust-item b{font-size:11px}.trust-item small{font-size:10px}
+ .routes-section{padding-top:28px;padding-bottom:38px}
+ .section-heading{align-items:flex-start;gap:12px}
+ .route-grid{grid-template-columns:1fr 1fr;gap:10px}
+ .route-card{border-radius:14px}.route-art{min-height:86px}.route-art-caption{font-size:7px;letter-spacing:.8px}.route-number{font-size:9px}
+ .route-card-body{padding:11px}
+ .route-names{gap:4px}.route-names b{font-size:11px}.route-names span svg{width:12px}
+ .route-meta{margin-top:11px}.route-meta span{font-size:9px}.route-meta strong{font-size:16px}
+ .route-card-footer{gap:4px;flex-wrap:wrap}.route-card-footer>span:first-child{font-size:9px;padding:4px 6px}.route-cta{font-size:10px}
+ .offer-section{margin:0 14px 30px;border-radius:18px;min-height:290px}
+ .offer-copy{padding:24px 20px}.offer-copy h2{font-size:38px}
+ .offer-art{transform:scale(.78);transform-origin:right bottom;right:-25px;bottom:-10px;opacity:.65}
+ .help-section{margin:0 14px 28px;padding:20px;grid-template-columns:auto 1fr;gap:12px}
+ .help-section h2{font-size:23px}.help-section p{font-size:12px;line-height:1.65}
+ .help-section>a{grid-column:2}
+ .site-footer{padding:28px 18px 18px}
+ .footer-main{gap:16px}.footer-links{gap:12px 18px;flex-wrap:wrap}.footer-links a{font-size:11px}
+ .footer-bottom{gap:9px;flex-direction:column;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
