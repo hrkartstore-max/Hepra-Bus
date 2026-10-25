@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  let db: ReturnType<typeof getSupabaseAdmin>;
+  let db: ReturnType<typeof getSupabaseAdmin> | undefined;
   let runId: string | undefined;
   try {
     db = getSupabaseAdmin();
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Expired booking hold release is not configured", error instanceof Error ? error.message : "unknown");
-    if (db!) await finishRun(db, runId, { status: "failed", errorCode: "server_not_configured" });
+    if (db) await finishRun(db, runId, { status: "failed", errorCode: "server_not_configured" });
     return NextResponse.json({ ok: false, error: "server_not_configured" }, {
       status: 503, headers: { "Cache-Control": "no-store" },
     });
