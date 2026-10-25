@@ -40,3 +40,25 @@ Copy `.env.example` to `.env.local` and set `SUPABASE_URL`, `SUPABASE_SERVICE_RO
 - `POST /api/bookings/validate?mode=lookup` validates a booking-reference lookup payload.
 - The endpoint returns validation errors for malformed JSON or invalid fields and disables response caching.
 - **These endpoints do not create or retrieve bookings.** Database transactions, seat locking, authenticated access, rate limiting and privacy-safe logging must be implemented before production use.
+
+## Shopify-led storefront integration (in progress)
+
+A new Shopify storefront preview was requested for HEPRA BUS. Preview generation is pending; it is not yet a created or claimed Shopify store. Claiming a generated preview creates a new store and does not connect it automatically to this repository.
+
+- Architecture and phased setup: `docs/shopify-integration.md`
+- Safe readiness diagnostic: `GET /api/shopify/status`
+- Shopify environment placeholders: `.env.example`
+
+The diagnostic only reports whether configuration values are present. It does not verify Shopify API access, checkout, gateway activation, webhook signatures, or booking confirmation.
+
+### Next implementation steps
+
+1. Claim the generated preview after Shopify finishes generating it, then complete the new store setup using the actual business details.
+2. In Shopify Admin, check Settings → Payments for providers available to the store's India-based business and complete provider onboarding.
+3. Create a Shopify custom app and configure least-privilege API scopes plus the required webhooks.
+4. Implement server-side trip search and booking hold integration; keep Supabase as the source of truth for seat inventory.
+5. Implement the supported Shopify checkout/order workflow with server-calculated fares, idempotent order-to-booking mapping, verified webhook HMAC, and late-payment reconciliation.
+6. Test checkout and booking lifecycle end-to-end before enabling real customer payments.
+
+**Production warning:** HEPRA BUS is not yet integrated with a live Shopify store. Do not accept real payments or passenger bookings through Shopify until the integration and concurrency/payment tests are complete.
+
