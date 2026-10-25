@@ -46,3 +46,6 @@ If payment is captured after the seat hold has expired, or the held-seat invento
 ## Operations monitoring
 
 Staff can open `/admin/operations` after signing in at `/admin/verification`. The read-only dashboard summarizes pending bookings, pending holds past expiry, confirmed and expired bookings, succeeded payment records, open reconciliation cases, and succeeded payments whose booking is not confirmed. It does not run cleanup, confirm bookings, or issue refunds. Use `/admin/reconciliation` for case tracking and review the Razorpay dashboard before resolving payment exceptions.
+
+
+The operations monitor also displays the last eight recorded runs of the `release-expired-booking-holds` scheduled task. The endpoint records successful/failed execution and released-seat count in `cron_job_runs`. A missing run is not proof of a scheduler outage; it may mean the task has never run since logging was added or the scheduler is not configured. Check scheduler delivery and server logs alongside the dashboard.
