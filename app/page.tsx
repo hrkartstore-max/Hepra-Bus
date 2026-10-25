@@ -104,6 +104,8 @@ export default function Home() {
   const [liveSeatLoading, setLiveSeatLoading] = useState(false);
   const [liveSeatError, setLiveSeatError] = useState("");
   const [liveSelectedSeats, setLiveSelectedSeats] = useState<string[]>([]);
+  const [selectedBoardingPoint, setSelectedBoardingPoint] = useState("");
+  const [selectedDroppingPoint, setSelectedDroppingPoint] = useState("");
   const [liveContactName, setLiveContactName] = useState("");
   const [liveContactPhone, setLiveContactPhone] = useState("");
   const [liveContactEmail, setLiveContactEmail] = useState("");
@@ -196,6 +198,9 @@ export default function Home() {
 
   async function selectLiveTrip(trip: LiveTrip) {
     setSelectedLiveTrip(trip);
+    const routeData = Array.isArray(trip.route) ? trip.route[0] : trip.route;
+    setSelectedBoardingPoint(routeData?.origin_stop || routeData?.origin_city || "");
+    setSelectedDroppingPoint(routeData?.destination_stop || routeData?.destination_city || "");
     setLiveSeats([]);
     setLiveSelectedSeats([]);
     setLivePassengerNames({});
@@ -305,6 +310,8 @@ export default function Home() {
           contactName: liveContactName.trim(),
           phone: liveContactPhone.trim(),
           email: liveContactEmail.trim(),
+          boardingPoint: selectedBoardingPoint,
+          droppingPoint: selectedDroppingPoint,
           passengers: passengerDetails,
         }),
       });
@@ -416,6 +423,8 @@ export default function Home() {
             </div>
             <form className="passenger-card" onSubmit={createLiveHold}>
               <span className="section-overline">STEP 2 · TRAVELLER INFO</span><h3>Who is travelling?</h3><p className="passenger-intro">Add the contact details and a name for every selected seat.</p>
+              <label className="form-field"><span>BOARDING POINT</span><div><MapPin size={17} /><select required value={selectedBoardingPoint} onChange={(event) => setSelectedBoardingPoint(event.target.value)}><option value="">Choose boarding point</option>{Array.from(new Set([...(Array.isArray(selectedLiveTrip.route) ? selectedLiveTrip.route[0] : selectedLiveTrip.route)?.origin_stop || "", (Array.isArray(selectedLiveTrip.route) ? selectedLiveTrip.route[0] : selectedLiveTrip.route)?.origin_city || ""].filter(Boolean))).map((point) => <option key={point} value={point}>{point}</option>)}</select></div></label>
+              <label className="form-field"><span>DROPPING POINT</span><div><MapPin size={17} /><select required value={selectedDroppingPoint} onChange={(event) => setSelectedDroppingPoint(event.target.value)}><option value="">Choose dropping point</option>{Array.from(new Set([...(Array.isArray(selectedLiveTrip.route) ? selectedLiveTrip.route[0] : selectedLiveTrip.route)?.destination_stop || "", (Array.isArray(selectedLiveTrip.route) ? selectedLiveTrip.route[0] : selectedLiveTrip.route)?.destination_city || ""].filter(Boolean))).map((point) => <option key={point} value={point}>{point}</option>)}</select></div></label>
               <label className="form-field"><span>CONTACT NAME</span><div><UserRound size={17} /><input required minLength={2} maxLength={120} value={liveContactName} onChange={(event) => setLiveContactName(event.target.value)} placeholder="Booking contact name" autoComplete="name" /></div></label>
               <label className="form-field"><span>MOBILE NUMBER</span><div><Phone size={17} /><span className="country-code">+91</span><input required inputMode="numeric" maxLength={10} value={liveContactPhone} onChange={(event) => setLiveContactPhone(event.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit mobile number" autoComplete="tel-national" /></div></label>
               <label className="form-field"><span>EMAIL (OPTIONAL)</span><div><input type="email" maxLength={254} value={liveContactEmail} onChange={(event) => setLiveContactEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" /></div></label>
