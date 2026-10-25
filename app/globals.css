@@ -418,3 +418,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
  .live-filter-bar label select{width:100%;min-width:0}
  .live-filter-bar>span{grid-column:1/-1;width:auto;margin:0;padding-top:7px;border-top:1px solid #e7e8f0}
 }
+
+
+/* Live inventory presented as a bus cabin, while preserving database seat labels */
+.live-bus-front{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 0;padding:10px 13px;border:1px solid #e5e2ef;border-bottom:0;border-radius:14px 14px 0 0;background:linear-gradient(90deg,#f7f4ff,#fff7f7);color:#5d6070}
+.live-bus-front>span{display:flex;align-items:center;gap:7px;font-size:9px;font-weight:900;letter-spacing:.8px}
+.live-bus-front svg{color:var(--hepra-violet)}
+.live-driver-label{padding:6px 9px;border:1px dashed #c9c3d8;border-radius:7px;color:#7b728d}
+.live-seat-list.live-seat-map-grid{display:grid;border-radius:0 0 14px 14px;border-top:1px dashed #d8d4e3;padding:15px;gap:11px 12px;background:linear-gradient(180deg,#faf9fd,#fff)}
+.live-seat-map-grid button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:66px;border-radius:11px 11px 8px 8px;font-weight:900;font-size:12px;transition:transform .15s ease,box-shadow .15s ease}
+.live-seat-map-grid button:before{content:"";position:absolute;inset:5px 5px auto;height:4px;border-radius:5px;background:currentColor;opacity:.17}
+.live-seat-map-grid button small{font-size:9px;font-weight:700;opacity:.8}
+.live-seat-map-grid button.available:hover{transform:translateY(-2px);box-shadow:0 5px 12px #17663e16}
+.live-seat-map-grid button:disabled{cursor:not-allowed}
+@media(max-width:760px){.live-bus-front{padding:9px 11px}.live-seat-list.live-seat-map-grid{gap:8px;padding:11px}.live-seat-map-grid button{min-height:59px;font-size:11px}.live-seat-map-grid button small{font-size:8px}}
