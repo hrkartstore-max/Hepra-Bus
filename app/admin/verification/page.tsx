@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { CSSProperties, FormEvent } from "react";
 import { AlertTriangle, ArrowLeft, BusFront, CheckCircle2, Search, ShieldCheck, Ticket, XCircle } from "lucide-react";
 
 type TicketResult = {
@@ -8,7 +9,7 @@ type TicketResult = {
   busLabel: string | null; departureAt: string | null; arrivalAt: string | null;
   origin: string | null; destination: string | null;
 };
-const card: React.CSSProperties = { background: "#fff", border: "1px solid #e5e9f0", borderRadius: 18, padding: 20, boxShadow: "0 12px 35px #17243a0a" };
+const card: CSSProperties = { background: "#fff", border: "1px solid #e5e9f0", borderRadius: 18, padding: 20, boxShadow: "0 12px 35px #17243a0a" };
 const label: React.CSSProperties = { display: "block", color: "#748096", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 };
 const value: React.CSSProperties = { color: "#17243a", fontSize: 15, fontWeight: 750, overflowWrap: "anywhere" };
 
@@ -26,7 +27,7 @@ export default function StaffVerificationPage() {
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  async function verify(event: React.FormEvent<HTMLFormElement>) {
+  async function verify(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true); setResult(null); setMessage(""); setError(false);
     try {
