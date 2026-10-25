@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
-import { AlertTriangle, ArrowLeft, BusFront, CheckCircle2, Search, ShieldCheck, Ticket, XCircle } from "lucide-react";
+import { AlertTriangle, ArrowLeft, BusFront, Camera, CameraOff, CheckCircle2, Search, ShieldCheck, XCircle } from "lucide-react";
 
 type TicketResult = {
   reference: string; status: string; valid: boolean; confirmedAt: string | null;
@@ -19,6 +19,18 @@ function date(value?: string | null) {
   return Number.isNaN(parsed.getTime()) ? "—" : parsed.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 }
 
+type QRDetector = { detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue: string }>> };
+type QRWindow = Window & { BarcodeDetector?: new (options?: { formats: string[] }) => QRDetector };
+
+function extractReference(raw: string) {
+  const direct = raw.trim().toUpperCase().match(/HB-[A-F0-9]{12}/);
+  if (direct) return direct[0];
+  try {
+    const parsed = new URL(raw);
+    return (parsed.searchParams.get("reference") || "").trim().toUpperCase().match(/^HB-[A-F0-9]{12}$/)?.[0] || "";
+  } catch { return ""; }
+}
+
 export default function StaffVerificationPage() {
   const [token, setToken] = useState("");
   const [reference, setReference] = useState("");
@@ -26,6 +38,67 @@ export default function StaffVerificationPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [cameraOn, setCameraOn] = useState(false);
+  const [cameraMessage, setCameraMessage] = useState("");
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (!cameraOn) return;
+    let stopped = false;
+    let stream: MediaStream | null = null;
+    let frame = 0;
+    let detector: QRDetector | null = null;
+    async function startScanner() {
+      try {
+        const Detector = (window as QRWindow).BarcodeDetector;
+        if (!Detector) {
+          setCameraMessage("This browser does not support built-in QR scanning. Use Chrome on Android or enter the booking reference manually.");
+          setCameraOn(false);
+          return;
+        }
+        if (!navigator.mediaDevices?.getUserMedia) {
+          setCameraMessage("Camera access requires HTTPS and a supported browser. You can enter the reference manually.");
+          setCameraOn(false);
+          return;
+        }
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+        if (stopped) { stream.getTracks().forEach(track => track.stop()); return; }
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+        detector = new Detector({ formats: ["qr_code"] });
+        setCameraMessage("Point the rear camera at the ticket QR code.");
+        const scan = async () => {
+          if (stopped || !videoRef.current || !detector) return;
+          try {
+            if (videoRef.current.readyState >= 2) {
+              const codes = await detector.detect(videoRef.current);
+              const found = codes.map(code => extractReference(code.rawValue)).find(Boolean);
+              if (found) {
+                setReference(found);
+                setCameraMessage("QR captured. Tap Verify ticket to check its live booking status.");
+                setCameraOn(false);
+                return;
+              }
+            }
+          } catch { /* A frame may not be decodable; keep scanning. */ }
+          if (!stopped) frame = requestAnimationFrame(scan);
+        };
+        frame = requestAnimationFrame(scan);
+      } catch {
+        setCameraMessage("Camera permission was denied or the camera is unavailable. Allow camera access or enter the reference manually.");
+        setCameraOn(false);
+      }
+    }
+    void startScanner();
+    return () => {
+      stopped = true;
+      cancelAnimationFrame(frame);
+      stream?.getTracks().forEach(track => track.stop());
+      if (videoRef.current) videoRef.current.srcObject = null;
+    };
+  }, [cameraOn]);
 
   async function verify(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,6 +131,13 @@ export default function StaffVerificationPage() {
           <label style={{ display: "grid", gap: 7, fontSize: 12, fontWeight: 800, color: "#536277" }}>STAFF / ADMIN TOKEN
             <input value={token} onChange={e => setToken(e.target.value)} type="password" autoComplete="current-password" required placeholder="Enter server-configured admin token" style={{ width: "100%", boxSizing: "border-box", padding: 13, borderRadius: 11, border: "1px solid #dce3ec", background: "#fff" }}/>
           </label>
+          <div style={{ display: "grid", gap: 10 }}>
+            <button type="button" onClick={() => { setCameraMessage(""); setCameraOn(value => !value); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, border: "1px solid #d8d1f3", borderRadius: 11, padding: 13, background: "#f7f4ff", color: "#5b2bbb", fontWeight: 850, cursor: "pointer" }}>
+              {cameraOn ? <CameraOff size={18}/> : <Camera size={18}/>} {cameraOn ? "Stop camera scanner" : "Scan ticket QR with camera"}
+            </button>
+            {cameraOn && <video ref={videoRef} muted playsInline aria-label="Camera view for scanning ticket QR" style={{ display: "block", width: "100%", maxHeight: 320, objectFit: "cover", background: "#101827", borderRadius: 12 }}/>}
+            {cameraMessage && <p role="status" style={{ margin: 0, color: "#68758a", fontSize: 12, lineHeight: 1.5 }}>{cameraMessage}</p>}
+          </div>
           <label style={{ display: "grid", gap: 7, fontSize: 12, fontWeight: 800, color: "#536277" }}>BOOKING REFERENCE
             <input value={reference} onChange={e => setReference(e.target.value.toUpperCase())} required maxLength={15} autoCapitalize="characters" placeholder="HB-XXXXXXXXXXXX" style={{ width: "100%", boxSizing: "border-box", padding: 14, borderRadius: 11, border: "1px solid #dce3ec", fontSize: 18, letterSpacing: ".05em", fontWeight: 800 }}/>
           </label>
