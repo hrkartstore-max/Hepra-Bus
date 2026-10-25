@@ -7,7 +7,12 @@ export const dynamic = "force-dynamic";
 const response = (body: unknown, status = 200) =>
   NextResponse.json(body, {
     status,
-    headers: { "Cache-Control": "no-store, max-age=0" },
+    headers: {
+      "Cache-Control": "no-store, max-age=0",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Accept, Content-Type",
+    },
   });
 
 const cleanCity = (value: string | null) =>
@@ -17,6 +22,18 @@ function validDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const date = new Date(`${value}T00:00:00.000Z`);
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Accept, Content-Type",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
 }
 
 /**
