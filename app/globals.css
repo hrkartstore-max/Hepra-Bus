@@ -977,3 +977,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
  #my-trips .ticket-status-guide{background:#fff!important;border:1px solid #ddd!important}
  #my-trips .ticket-status-guide *{visibility:visible!important}
 }
+
+
+/* V8 booking status refresh action */
+.booking-refresh-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:13px 0 20px;padding:12px 14px;border:1px solid #e9e2f3;border-radius:13px;background:#fbf9ff}
+.booking-refresh-row>span{display:flex;align-items:flex-start;gap:7px;font-size:10px;line-height:1.5;color:#777184}
+.booking-refresh-row>span svg{flex:0 0 auto;color:#6b35d5;margin-top:1px}
+.booking-refresh-row .secondary-ticket-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;min-height:38px;padding:9px 12px;font-size:11px;font-weight:850}
+.booking-refresh-row .secondary-ticket-button:disabled{opacity:.65;cursor:wait}
+@media(max-width:640px){
+ .booking-refresh-row{align-items:stretch;flex-direction:column;gap:10px;padding:12px}
+ .booking-refresh-row .secondary-ticket-button{width:100%;min-height:42px}
+}
+@media print{.booking-refresh-row{display:none!important}}
