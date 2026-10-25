@@ -83,6 +83,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   trip_id UUID NOT NULL REFERENCES trips(id) ON DELETE RESTRICT,
   boarding_point TEXT,
   dropping_point TEXT,
+  boarding_reporting_minutes INTEGER CHECK (boarding_reporting_minutes IS NULL OR boarding_reporting_minutes BETWEEN 0 AND 180),
+  dropping_reporting_minutes INTEGER CHECK (dropping_reporting_minutes IS NULL OR dropping_reporting_minutes BETWEEN 0 AND 180),
   contact_name TEXT NOT NULL,
   contact_phone TEXT NOT NULL,
   contact_email TEXT,
